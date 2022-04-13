@@ -50,7 +50,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/ReadSettings.ps1 -actor -token '${{ inputs.token }}' -project '${{ inputs.project }}' -getprojects ('${{ inputs.getprojects }}' -eq 'Y') -getenvironments '${{ inputs.getenvironments }}' -includeProduction ('${{ inputs.includeProduction }}' -eq 'Y') -release ('${{ inputs.release }}' -eq 'Y') -get '${{ inputs.get }}'
+    - run: ${{ github.action_path }}/ReadSettings.ps1 -project '${{ inputs.project }}'
       id: readsettings
       shell: PowerShell
 branding:
