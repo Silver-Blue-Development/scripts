@@ -28,7 +28,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/runpipeline.ps1 -actor '${{ inputs.actor }}' -token '${{ inputs.token }}' -parentTelemetryScopeJson '${{ inputs.parentTelemetryScopeJson }}' -project '${{ inputs.project }}' -settingsJson '${{ inputs.settingsJson }}' -secretsJson '${{ inputs.secretsJson }}'
+    - run: ${{ github.action_path }}/Run-Pipeline.ps1 -actor '${{ inputs.actor }}' -token '${{ inputs.token }}' -parentTelemetryScopeJson '${{ inputs.parentTelemetryScopeJson }}' -project '${{ inputs.project }}' -settingsJson '${{ inputs.settingsJson }}' -secretsJson '${{ inputs.secretsJson }}'
       shell: PowerShell
 branding:
   icon: terminal
