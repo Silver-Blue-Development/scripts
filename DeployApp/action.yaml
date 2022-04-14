@@ -1,0 +1,15 @@
+name: PowerShell script
+inputs:
+  artifacts:
+    description: Specifies the path to the apps
+    required: true
+    default: ''
+runs:
+  using: composite
+  steps:
+    - run: ${{ github.action_path }}/Deploy-App.ps1 -artifacts '${{ inputs.artifacts }}'
+      id: deployapp
+      shell: PowerShell
+branding:
+  icon: terminal
+  color: blue
