@@ -77,7 +77,8 @@ function GetHeader {
     )
     $headers = @{ "Accept" = $accept }
     if (![string]::IsNullOrEmpty($token)) {
-        $headers["Authorization"] = "token $token"
+        $headers["Authorization"] = "bearer $token"
+        #$headers["Authorization"] = "token $token"
     }
 
     return $headers
@@ -156,19 +157,15 @@ function GetArtifacts {
         [string] $token,
         [string] $api_url = $ENV:GITHUB_API_URL,
         [string] $repository = $ENV:GITHUB_REPOSITORY,
-        [string] $mask = "-Apps-"
+        [string] $mask = "Apps"
     )
 
     Write-Host "Analyzing artifacts"
     Write-Host "$api_url/repos/$repository/actions/artifacts"
 
-    $uri = "$api_url/repos/$repository/actions/artifacts"
-    
-    # $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    # $headers.Add('Accept','application/vnd.github.v3+json')
-    # $headers.Add('Authorization','Bearer ' + $token)
-    
-    # $artifacts = Invoke-WebRequest -UseBasicParsing -Uri $uri -Headers $headers | ConvertFrom-Json
+    #$uri = "$api_url/repos/$repository/actions/artifacts"
+    $uri = "https://api.github.com/repos/Silver-Blue-Development/MyDependedApp/actions/artifacts"
+    $token = "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"
 
     $artifacts = Invoke-WebRequest -UseBasicParsing -Headers (GetHeader -token $token) -Uri $uri | ConvertFrom-Json
     $artifacts.artifacts | Where-Object { $_.name -like "*$($mask)*" }
