@@ -47,7 +47,7 @@ try {
     Write-Host = "App Revision = $($appRevision)"
 
     $appRevision = $settings.appRevision
-    'licenseFileUrl','insiderSasToken','CodeSignCertificateUrl','CodeSignCertificatePassword','KeyVaultCertificateUrl','KeyVaultCertificatePassword','KeyVaultClientId','StorageContext' | ForEach-Object {
+    'licenseFileUrl'| ForEach-Object {
         if ($secrets.ContainsKey($_)) {
             $value = $secrets."$_"
         }
@@ -63,12 +63,12 @@ try {
         exit
     }
 
-    if ($repo.type -eq "AppSource App" ) {
-        if ($licenseFileUrl -eq "") {
-            OutputError -message "When building an AppSource App, you need to create a secret called LicenseFileUrl, containing a secure URL to your license file with permission to the objects used in the app."
-            exit
-        }
-    }
+    # if ($repo.type -eq "AppSource App" ) {
+    #     if ($licenseFileUrl -eq "") {
+    #         OutputError -message "When building an AppSource App, you need to create a secret called LicenseFileUrl, containing a secure URL to your license file with permission to the objects used in the app."
+    #         exit
+    #     }
+    # }
 
     $artifact = $repo.artifact
     $installApps = $repo.installApps
@@ -76,27 +76,27 @@ try {
     $doNotBuildTests = $repo.doNotBuildTests
     $doNotRunTests = $repo.doNotRunTests
 
-    if ($repo.appDependencyProbingPaths) {
-        Write-Host "Downloading dependencies ..."
-        $installApps += Get-dependencies -probingPathsJson $repo.appDependencyProbingPaths -token $token -mask "-Apps-"
-        Get-dependencies -probingPathsJson $repo.appDependencyProbingPaths -token $token -mask "-TestApps-" | ForEach-Object {
-            $installTestApps += "($_)"
-        }
-    }
+    # if ($repo.appDependencyProbingPaths) {
+    #     Write-Host "Downloading dependencies ..."
+    #     $installApps += Get-dependencies -probingPathsJson $repo.appDependencyProbingPaths -token $token -mask "-Apps-"
+    #     ForEach-Object {
+    #         $installTestApps += "($_)"          
+    #     }
+    # }
     
-    if ($CodeSignCertificateUrl -and $CodeSignCertificatePassword) {
-        $runAlPipelineParams += @{ 
-            "CodeSignCertPfxFile" = $codeSignCertificateUrl
-            "CodeSignCertPfxPassword" = ConvertTo-SecureString -string $codeSignCertificatePassword -AsPlainText -Force
-        }
-    }
-    if ($KeyVaultCertificateUrl -and $KeyVaultCertificatePassword -and $KeyVaultClientId) {
-        $runAlPipelineParams += @{ 
-            "KeyVaultCertPfxFile" = $KeyVaultCertificateUrl
-            "keyVaultCertPfxPassword" = ConvertTo-SecureString -string $keyVaultCertificatePassword -AsPlainText -Force
-            "keyVaultClientId" = $keyVaultClientId
-        }
-    }
+    # if ($CodeSignCertificateUrl -and $CodeSignCertificatePassword) {
+    #     $runAlPipelineParams += @{ 
+    #         "CodeSignCertPfxFile" = $codeSignCertificateUrl
+    #         "CodeSignCertPfxPassword" = ConvertTo-SecureString -string $codeSignCertificatePassword -AsPlainText -Force
+    #     }
+    # }
+    # if ($KeyVaultCertificateUrl -and $KeyVaultCertificatePassword -and $KeyVaultClientId) {
+    #     $runAlPipelineParams += @{ 
+    #         "KeyVaultCertPfxFile" = $KeyVaultCertificateUrl
+    #         "keyVaultCertPfxPassword" = ConvertTo-SecureString -string $keyVaultCertificatePassword -AsPlainText -Force
+    #         "keyVaultClientId" = $keyVaultClientId
+    #     }
+    # }
 
     $previousApps = @()
     if ($repo.skipUpgrade) {
