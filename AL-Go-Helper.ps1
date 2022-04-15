@@ -12,7 +12,7 @@ Set-StrictMode -Version 2.0
 
 $ALGoFolder = ".AL-Go\"
 $ALGoSettingsFile = ".AL-Go\settings.json"
-$RepoSettingsFile = ".github\AL-Go-Settings.json"
+#$RepoSettingsFile = ".github\AL-Go-Settings.json"
 $runningLocal = $local.IsPresent
 
 $runAlPipelineOverrides = @(
@@ -206,21 +206,21 @@ function DownloadAndImportBcContainerHelper {
     )
 
     $params = @{ "ExportTelemetryFunctions" = $true }
-    if ($baseFolder) {
-        $repoSettingsPath = Join-Path $baseFolder $repoSettingsFile
-        if (-not (Test-Path $repoSettingsPath)) {
-            $repoSettingsPath = Join-Path $baseFolder "..\$repoSettingsFile"
-        }
-        if (Test-Path $repoSettingsPath) {
-            if (-not $BcContainerHelperVersion) {
-                $repoSettings = Get-Content $repoSettingsPath -Encoding UTF8 | ConvertFrom-Json | ConvertTo-HashTable
-                if ($repoSettings.ContainsKey("BcContainerHelperVersion")) {
-                    $BcContainerHelperVersion = $repoSettings.BcContainerHelperVersion
-                }
-            }
-            $params += @{ "bcContainerHelperConfigFile" = $repoSettingsPath }
-        }
-    }
+    # if ($baseFolder) {
+    #     $repoSettingsPath = Join-Path $baseFolder $repoSettingsFile
+    #     if (-not (Test-Path $repoSettingsPath)) {
+    #         $repoSettingsPath = Join-Path $baseFolder "..\$repoSettingsFile"
+    #     }
+    #     if (Test-Path $repoSettingsPath) {
+    #         if (-not $BcContainerHelperVersion) {
+    #             $repoSettings = Get-Content $repoSettingsPath -Encoding UTF8 | ConvertFrom-Json | ConvertTo-HashTable
+    #             if ($repoSettings.ContainsKey("BcContainerHelperVersion")) {
+    #                 $BcContainerHelperVersion = $repoSettings.BcContainerHelperVersion
+    #             }
+    #         }
+    #         $params += @{ "bcContainerHelperConfigFile" = $repoSettingsPath }
+    #     }
+    # }
     if (-not $BcContainerHelperVersion) {
         $BcContainerHelperVersion = "latest"
     }
@@ -406,11 +406,12 @@ function ReadSettings {
 
     $gitHubFolder = ".github"
     if (!(Test-Path (Join-Path $baseFolder $gitHubFolder) -PathType Container)) {
-        $RepoSettingsFile = "..\$RepoSettingsFile"
+        #$RepoSettingsFile = "..\$RepoSettingsFile"
         $gitHubFolder = "..\$gitHubFolder"
     }
     $workflowName = $workflowName.Split([System.IO.Path]::getInvalidFileNameChars()) -join ""
-    $RepoSettingsFile, $ALGoSettingsFile, (Join-Path $gitHubFolder "$workflowName.settings.json"), (Join-Path $ALGoFolder "$workflowName.settings.json"), (Join-Path $ALGoFolder "$userName.settings.json") | ForEach-Object {
+    $ALGoSettingsFile, (Join-Path $gitHubFolder "$workflowName.settings.json"), (Join-Path $ALGoFolder "$workflowName.settings.json"), (Join-Path $ALGoFolder "$userName.settings.json") | ForEach-Object {
+    #$RepoSettingsFile, $ALGoSettingsFile, (Join-Path $gitHubFolder "$workflowName.settings.json"), (Join-Path $ALGoFolder "$workflowName.settings.json"), (Join-Path $ALGoFolder "$userName.settings.json") | ForEach-Object {
         $settingsFile = $_
         $settingsPath = Join-Path $baseFolder $settingsFile
         Write-Host "Checking $settingsFile"
@@ -447,30 +448,30 @@ function AnalyzeRepo {
     # Check applicationDependency
     [Version]$settings.applicationDependency | Out-null
 
-
-    Write-Host "Checking type"
-    if ($settings.type -eq "PTE") {
-        if (!$settings.Contains('enablePerTenantExtensionCop')) {
-            $settings.Add('enablePerTenantExtensionCop', $true)
-        }
-        if (!$settings.Contains('enableAppSourceCop')) {
-            $settings.Add('enableAppSourceCop', $false)
-        }
+    # Write-Host "Checking type"
+    # if ($settings.type -eq "PTE") {
+    if (!$settings.Contains('enablePerTenantExtensionCop')) {
+        Write-Host "Enable Per Tenant Extension Cop"
+        $settings.Add('enablePerTenantExtensionCop', $true)
     }
-    elseif ($settings.type -eq "AppSource App" ) {
-        if (!$settings.Contains('enablePerTenantExtensionCop')) {
-            $settings.Add('enablePerTenantExtensionCop', $false)
-        }
-        if (!$settings.Contains('enableAppSourceCop')) {
-            $settings.Add('enableAppSourceCop', $true)
-        }
-        if ($settings.enableAppSourceCop -and (-not ($settings.appSourceCopMandatoryAffixes))) {
-            throw "For AppSource Apps with AppSourceCop enabled, you need to specify AppSourceCopMandatoryAffixes in $ALGoSettingsFile"
-        }
-    }
-    else {
-        throw "The type, specified in $ALGoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
-    }
+    #     if (!$settings.Contains('enableAppSourceCop')) {
+    #         $settings.Add('enableAppSourceCop', $false)
+    #     }
+    # }
+    # elseif ($settings.type -eq "AppSource App" ) {
+    #     if (!$settings.Contains('enablePerTenantExtensionCop')) {
+    #         $settings.Add('enablePerTenantExtensionCop', $false)
+    #     }
+    #     if (!$settings.Contains('enableAppSourceCop')) {
+    #         $settings.Add('enableAppSourceCop', $true)
+    #     }
+    #     if ($settings.enableAppSourceCop -and (-not ($settings.appSourceCopMandatoryAffixes))) {
+    #         throw "For AppSource Apps with AppSourceCop enabled, you need to specify AppSourceCopMandatoryAffixes in $ALGoSettingsFile"
+    #     }
+    # }
+    # else {
+    #     throw "The type, specified in $ALGoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
+    # }
 
     $artifact = $settings.artifact
     if ($artifact.Contains('{INSIDERSASTOKEN}')) {
