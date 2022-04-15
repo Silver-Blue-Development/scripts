@@ -34,46 +34,21 @@ function Get-dependencies {
 
         Write-Host "Getting releases from $($dependency.repo)"
         $repository = ([uri]$dependency.repo).AbsolutePath.Replace(".git", "").TrimStart("/")
-        if ($dependency.release_status -eq "latestBuild") {
+        Write-Host "Repo = $repository"
 
-            # TODO it should check the branch and limit to a certain branch
-            $artifacts = GetArtifacts -token $dependency.authTokenSecret -api_url $api_url -repository $repository -mask $mask
-            if ($dependency.version -ne "latest") {
-                $artifacts = $artifacts | Where-Object { ($_.tag_name -eq $dependency.version) }
-            }    
-                
-            $artifact = $artifacts | Select-Object -First 1
-            if (!($artifact)) {
-                throw "Could not find any artifacts that matches the criteria."
-            }
-
-            $download = DownloadArtifact -path $saveToPath -token $dependency.authTokenSecret -artifact $artifact
+        Write-Host "Release Status = Latest Build"
+        $artifacts = GetArtifacts -token $dependency.authTokenSecret -api_url $api_url -repository $repository -mask $mask
+        if ($dependency.version -ne "latest") {
+            $artifacts = $artifacts | Where-Object { ($_.tag_name -eq $dependency.version) }
+        }    
+            
+        $artifact = $artifacts | Select-Object -First 1
+        if (!($artifact)) {
+            throw "Could not find any artifacts that matches the criteria."
         }
-        else {
 
-            $releases = GetReleases -api_url $api_url -token $dependency.authTokenSecret -repository $repository
-            if ($dependency.version -ne "latest") {
-                $releases = $releases | Where-Object { ($_.tag_name -eq $dependency.version) }
-            }
+        $download = DownloadArtifact -path $saveToPath -token $dependency.authTokenSecret -artifact $artifact
 
-            switch ($dependency.release_status) {
-                "release" { $release = $releases | Where-Object { -not ($_.prerelease -or $_.draft ) } | Select-Object -First 1 }
-                "prerelease" { $release = $releases | Where-Object { ($_.prerelease ) } | Select-Object -First 1 }
-                "draft" { $release = $releases | Where-Object { ($_.draft ) } | Select-Object -First 1 }
-                Default { throw "Invalid release status '$($dependency.release_status)' is encountered." }
-            }
-
-            if (!($release)) {
-                throw "Could not find a release that matches the criteria."
-            }
-                
-            $projects = $dependency.projects
-            if ([string]::IsNullOrEmpty($dependency.projects)) {
-                $projects = "*"
-            }
-
-            $download = DownloadRelease -token $dependency.authTokenSecret -projects $projects -api_url $api_url -repository $repository -path $saveToPath -release $release -mask $mask
-        }
         if ($download) {
             $downloadedList += $download
         }
