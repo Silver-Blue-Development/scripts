@@ -160,6 +160,7 @@ function GetArtifacts {
     )
 
     Write-Host "Analyzing artifacts"
+    Write-Host "$api_url/repos/$repository/actions/artifacts"
     $artifacts = Invoke-WebRequest -UseBasicParsing -Headers (GetHeader -token $token) -Uri "$api_url/repos/$repository/actions/artifacts" | ConvertFrom-Json
     $artifacts.artifacts | Where-Object { $_.name -like "*$($mask)*" }
 }
