@@ -613,7 +613,9 @@ function AnalyzeRepo {
                 try {
                     $appJson = Get-Content $appJsonFile -Encoding UTF8 | ConvertFrom-Json
                     if ($appJson.PSObject.Properties.Name -eq 'Dependencies') {
+                        Write-Host "Checking dependencies in app.json"
                         $appJson.dependencies | ForEach-Object {
+                            Write-Host "Found dependency $_"
                             if ($_.PSObject.Properties.Name -eq "AppId") {
                                 $id = $_.AppId
                             }
