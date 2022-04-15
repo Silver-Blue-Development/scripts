@@ -454,7 +454,7 @@ function AnalyzeRepo {
         $settings.Add('enablePerTenantExtensionCop', $true)
     }
     if (!$settings.Contains('enableAppSourceCop')) {
-        Write-Hoste "Disabled AppSource Cop"
+        Write-Host "Disabled AppSource Cop"
         $settings.Add('enableAppSourceCop', $false)
     }
     # }
