@@ -25,10 +25,14 @@ inputs:
     description: Secrets from repository in compressed Json format
     required: false
     default: '{"insiderSasToken":"","licenseFileUrl":"","CodeSignCertificateUrl":"","CodeSignCertificatePw":"","KeyVaultCertificateUrl":"","KeyVaultCertificatePw":"","KeyVaultClientId":""}'
+  gitHubPAT:
+    description: The personal access token to retrieve builds from dependent apps
+    required: true
+    default: ""   
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/Run-Pipeline.ps1 -actor '${{ inputs.actor }}' -token '${{ inputs.token }}' -parentTelemetryScopeJson '${{ inputs.parentTelemetryScopeJson }}' -project '${{ inputs.project }}' -settingsJson '${{ inputs.settingsJson }}' -secretsJson '${{ inputs.secretsJson }}'
+    - run: ${{ github.action_path }}/Run-Pipeline.ps1 -actor '${{ inputs.actor }}' -token '${{ inputs.token }}' -parentTelemetryScopeJson '${{ inputs.parentTelemetryScopeJson }}' -project '${{ inputs.project }}' -settingsJson '${{ inputs.settingsJson }}' -secretsJson '${{ inputs.secretsJson }}' -gitHubPAT '${{ inputs.GitHubPAT }}'
       shell: PowerShell
 branding:
   icon: terminal

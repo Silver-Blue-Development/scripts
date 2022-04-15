@@ -10,7 +10,9 @@ Param(
     [Parameter(HelpMessage = "Settings from repository in compressed Json format", Mandatory = $false)]
     [string] $settingsJson = '{"AppBuild":"", "AppRevision":""}',
     [Parameter(HelpMessage = "Secrets from repository in compressed Json format", Mandatory = $false)]
-    [string] $secretsJson = '{"licenseFileUrl":"PersonalAccesToken"}'
+    [string] $secretsJson = '{"licenseFileUrl":"PersonalAccesToken"}',
+    [Parameter(HelpMessage = "The Person Access Token for used GitHub repositories", Mandatory = $true)]
+    [string] $gitHubPAT
 )
 
 $ErrorActionPreference = "Stop"
@@ -52,7 +54,7 @@ try {
     Write-Host = "App Revision = $($appRevision)"
 
     $appRevision = $settings.appRevision
-    'licenseFileUrl', 'PersonalAccesToken'| ForEach-Object {
+    'licenseFileUrl'| ForEach-Object {
         if ($secrets.ContainsKey($_)) {
             $value = $secrets."$_"
         }
@@ -88,7 +90,7 @@ try {
  
     if ($repo.appDependencyProbingPaths) {
     Write-Host "Downloading dependencies ..."
-    $installApps += Get-dependencies -probingPathsJson $repo.appDependencyProbingPaths -token $PersonalAccesToken      
+    $installApps += Get-dependencies -probingPathsJson $repo.appDependencyProbingPaths -token $gitHubPAT      
     }
 
     # if ($repo.appDependencyProbingPaths) {
