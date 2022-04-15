@@ -164,13 +164,13 @@ function GetArtifacts {
 
     $uri = "$api_url/repos/$repository/actions/artifacts"
     
-    $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $headers.Add('Accept','application/vnd.github.v3+json')
-    $headers.Add('Authorization','Bearer ' + $token)
+    # $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+    # $headers.Add('Accept','application/vnd.github.v3+json')
+    # $headers.Add('Authorization','Bearer ' + $token)
     
-    $artifacts = Invoke-WebRequest -UseBasicParsing -Uri $uri -Headers $headers | ConvertFrom-Json
+    # $artifacts = Invoke-WebRequest -UseBasicParsing -Uri $uri -Headers $headers | ConvertFrom-Json
 
-    #$artifacts = Invoke-WebRequest -UseBasicParsing -Headers (GetHeader -token $token) -Uri "$api_url/repos/$repository/actions/artifacts" | ConvertFrom-Json
+    $artifacts = Invoke-WebRequest -UseBasicParsing -Headers (GetHeader -token $token) -Uri $uri | ConvertFrom-Json
     $artifacts.artifacts | Where-Object { $_.name -like "*$($mask)*" }
 
     Write-Host "Found this: $($artifacts.artifacts)"
