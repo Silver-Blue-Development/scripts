@@ -448,30 +448,31 @@ function AnalyzeRepo {
     [Version]$settings.applicationDependency | Out-null
 
 
-    Write-Host "Checking type"
-    if ($settings.type -eq "PTE") {
-        if (!$settings.Contains('enablePerTenantExtensionCop')) {
-            $settings.Add('enablePerTenantExtensionCop', $true)
-        }
-        if (!$settings.Contains('enableAppSourceCop')) {
-            $settings.Add('enableAppSourceCop', $false)
-        }
+    # Write-Host "Checking type"
+    # if ($settings.type -eq "PTE") {
+    if (!$settings.Contains('enablePerTenantExtensionCop')) {
+        $settings.Add('enablePerTenantExtensionCop', $true)
     }
-    elseif ($settings.type -eq "AppSource App" ) {
-        if (!$settings.Contains('enablePerTenantExtensionCop')) {
-            $settings.Add('enablePerTenantExtensionCop', $false)
-        }
-        if (!$settings.Contains('enableAppSourceCop')) {
-            $settings.Add('enableAppSourceCop', $true)
-        }
-        if ($settings.enableAppSourceCop -and (-not ($settings.appSourceCopMandatoryAffixes))) {
-            throw "For AppSource Apps with AppSourceCop enabled, you need to specify AppSourceCopMandatoryAffixes in $ALGoSettingsFile"
-        }
+    if (!$settings.Contains('enableAppSourceCop')) {
+        $settings.Add('enableAppSourceCop', $false)
     }
-    else {
-        throw "The type, specified in $ALGoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
-    }
+    # }
+    # elseif ($settings.type -eq "AppSource App" ) {
+    #     if (!$settings.Contains('enablePerTenantExtensionCop')) {
+    #         $settings.Add('enablePerTenantExtensionCop', $false)
+    #     }
+    #     if (!$settings.Contains('enableAppSourceCop')) {
+    #         $settings.Add('enableAppSourceCop', $true)
+    #     }
+    #     if ($settings.enableAppSourceCop -and (-not ($settings.appSourceCopMandatoryAffixes))) {
+    #         throw "For AppSource Apps with AppSourceCop enabled, you need to specify AppSourceCopMandatoryAffixes in $ALGoSettingsFile"
+    #     }
+    # }
+    # else {
+    #     throw "The type, specified in $ALGoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
+    # }
 
+    Write-Host "Artifact = $($settings.artifact)"    
     $artifact = $settings.artifact
     if ($artifact.Contains('{INSIDERSASTOKEN}')) {
         if ($insiderSasToken) {
@@ -485,6 +486,7 @@ function AnalyzeRepo {
     if (!$doNotCheckArtifactSetting) {
         Write-Host "Checking artifact setting"
         if ($artifact -like "https://*") {
+            Write-Host "Hello 001: https://"
             $artifactUrl = $artifact
             $storageAccount = ("$artifactUrl////".Split('/')[2]).Split('.')[0]
             $artifactType = ("$artifactUrl////".Split('/')[3])
@@ -494,6 +496,7 @@ function AnalyzeRepo {
         }
         else {
             $segments = "$artifact/////".Split('/')
+            Write-Host = "Segments: $segments"
             $storageAccount = $segments[0];
             $artifactType = $segments[1]; if ($artifactType -eq "") { $artifactType = 'Sandbox' }
             $version = $segments[2]

@@ -72,6 +72,7 @@ try {
 
     $artifact = $repo.artifact
     $installApps = $repo.installApps
+    Write-Host "Install Apps = $InstallApps"
     $installTestApps = $repo.installTestApps
     $doNotBuildTests = $repo.doNotBuildTests
     $doNotRunTests = $repo.doNotRunTests
