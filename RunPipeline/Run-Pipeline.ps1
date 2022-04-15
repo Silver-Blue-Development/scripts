@@ -17,6 +17,8 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 
 try {
+    Write-Host "********** Start Run-Pipeline **************"
+
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
     $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE 
 
@@ -28,7 +30,9 @@ try {
 
     $runAlPipelineParams = @{}
     $environment = 'GitHubActions'
-    if ($project  -eq ".") { $project = "" }
+    if ($project  -eq ".") { 
+        $project = "" 
+    }
     $baseFolder = Join-Path $ENV:GITHUB_WORKSPACE $project
     $sharedFolder = ""
     if ($project) {
@@ -37,7 +41,7 @@ try {
     $workflowName = $env:GITHUB_WORKFLOW
     $containerName = GetContainerName($project)
 
-    Write-Host "use settings and secrets"
+    Write-Host "Use settings and secrets"
     $settings = $settingsJson | ConvertFrom-Json | ConvertTo-HashTable
     $secrets = $secretsJson | ConvertFrom-Json | ConvertTo-HashTable
     $appBuild = $settings.appBuild
@@ -71,11 +75,16 @@ try {
     # }
 
     $artifact = $repo.artifact
+    Write-Host = "Artifcat = $artifact"
     $installApps = $repo.installApps
-    Write-Host "Install Apps = $InstallApps"
+    Write-Host "Install Apps = $installApps"
     $installTestApps = $repo.installTestApps
+    Write-Host "Install Apps = $installTestApps"
     $doNotBuildTests = $repo.doNotBuildTests
+    Write-Host "Do not build tests = $doNotBuildTests"
     $doNotRunTests = $repo.doNotRunTests
+    Write-Host "Do not run tests = $doNotRunTests"
+    Write-Host "Dependencies found = $($repo.dependencies)"
 
     # if ($repo.appDependencyProbingPaths) {
     #     Write-Host "Downloading dependencies ..."
@@ -125,6 +134,7 @@ try {
     }
 
     $additionalCountries = $repo.additionalCountries
+    Write-Host "Additional Counties = $additionalCountries"
 
     $imageName = ""
     if ($repo.gitHubRunner -ne "windows-latest") {
@@ -136,6 +146,7 @@ try {
     $CreateRuntimePackages = $false
 
     if ($repo.versioningStrategy -eq -1) {
+        Write-Host "Versioning Strategy = -1"
         $artifactVersion = [Version]$repo.artifact.Split('/')[4]
         $runAlPipelineParams += @{
             "appVersion" = "$($artifactVersion.Major).$($artifactVersion.Minor)"
@@ -144,6 +155,7 @@ try {
         $appRevision = $artifactVersion.Revision
     }
     elseif (($repo.versioningStrategy -band 16) -eq 16) {
+        Write-Host "Versioning Strategy = 16"
         $runAlPipelineParams += @{
             "appVersion" = $repo.repoVersion
         }

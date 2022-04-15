@@ -51,29 +51,29 @@ $testRunnerApps = @($permissionsMockAppId, $testRunnerAppId) + $performanceToolk
 
 $MicrosoftTelemetryConnectionString = "InstrumentationKey=84bd9223-67d4-4378-8590-9e4a46023be2;IngestionEndpoint=https://westeurope-1.in.applicationinsights.azure.com/"
 
-function invoke-git {
-    Param(
-        [parameter(mandatory = $true, position = 0)][string] $command,
-        [parameter(mandatory = $false, position = 1, ValueFromRemainingArguments = $true)] $remaining
-    )
+# function invoke-git {
+#     Param(
+#         [parameter(mandatory = $true, position = 0)][string] $command,
+#         [parameter(mandatory = $false, position = 1, ValueFromRemainingArguments = $true)] $remaining
+#     )
 
-    Write-Host -ForegroundColor Yellow "git $command $remaining"
-    git $command $remaining
-    if ($lastexitcode) { throw "git $command error" }
-}
+#     Write-Host -ForegroundColor Yellow "git $command $remaining"
+#     git $command $remaining
+#     if ($lastexitcode) { throw "git $command error" }
+# }
 
-function invoke-gh {
-    Param(
-        [parameter(mandatory = $true, position = 0)][string] $command,
-        [parameter(mandatory = $false, position = 1, ValueFromRemainingArguments = $true)] $remaining
-    )
+# function invoke-gh {
+#     Param(
+#         [parameter(mandatory = $true, position = 0)][string] $command,
+#         [parameter(mandatory = $false, position = 1, ValueFromRemainingArguments = $true)] $remaining
+#     )
 
-    Write-Host -ForegroundColor Yellow "gh $command $remaining"
-    $ErrorActionPreference = "SilentlyContinue"
-    gh $command $remaining
-    $ErrorActionPreference = "Stop"
-    if ($lastexitcode) { throw "gh $command error" }
-}
+#     Write-Host -ForegroundColor Yellow "gh $command $remaining"
+#     $ErrorActionPreference = "SilentlyContinue"
+#     gh $command $remaining
+#     $ErrorActionPreference = "Stop"
+#     if ($lastexitcode) { throw "gh $command error" }
+# }
 
 function ConvertTo-HashTable {
     [CmdletBinding()]
@@ -115,15 +115,15 @@ function OutputWarning {
     }
 }
 
-function MaskValueInLog {
-    Param(
-        [string] $value
-    )
+# function MaskValueInLog {
+#     Param(
+#         [string] $value
+#     )
 
-    if (!$runningLocal) {
-        Write-Host "::add-mask::$value"
-    }
-}
+#     if (!$runningLocal) {
+#         Write-Host "::add-mask::$value"
+#     }
+# }
 
 function OutputDebug {
     Param(
@@ -138,35 +138,35 @@ function OutputDebug {
     }
 }
 
-function GetUniqueFolderName {
-    Param(
-        [string] $baseFolder,
-        [string] $folderName
-    )
+# function GetUniqueFolderName {
+#     Param(
+#         [string] $baseFolder,
+#         [string] $folderName
+#     )
 
-    $i = 2
-    $name = $folderName
-    while (Test-Path (Join-Path $baseFolder $name)) {
-        $name = "$folderName($i)"
-        $i++
-    }
-    $name
-}
+#     $i = 2
+#     $name = $folderName
+#     while (Test-Path (Join-Path $baseFolder $name)) {
+#         $name = "$folderName($i)"
+#         $i++
+#     }
+#     $name
+# }
 
-function stringToInt {
-    Param(
-        [string] $str,
-        [int] $default = -1
-    )
+# function stringToInt {
+#     Param(
+#         [string] $str,
+#         [int] $default = -1
+#     )
 
-    $i = 0
-    if ([int]::TryParse($str.Trim(), [ref] $i)) { 
-        $i
-    }
-    else {
-        $default
-    }
-}
+#     $i = 0
+#     if ([int]::TryParse($str.Trim(), [ref] $i)) { 
+#         $i
+#     }
+#     else {
+#         $default
+#     }
+# }
 
 function Expand-7zipArchive {
     Param (
@@ -450,9 +450,11 @@ function AnalyzeRepo {
     # Write-Host "Checking type"
     # if ($settings.type -eq "PTE") {
     if (!$settings.Contains('enablePerTenantExtensionCop')) {
+        Write-Host "Enabled PerTenantExtensionCop"
         $settings.Add('enablePerTenantExtensionCop', $true)
     }
     if (!$settings.Contains('enableAppSourceCop')) {
+        Write-Hoste "Disabled AppSource Cop"
         $settings.Add('enableAppSourceCop', $false)
     }
     # }
@@ -485,7 +487,7 @@ function AnalyzeRepo {
     if (!$doNotCheckArtifactSetting) {
         Write-Host "Checking artifact setting"
         if ($artifact -like "https://*") {
-            Write-Host "Hello 001: https://"
+            Write-Host "Hello 001"
             $artifactUrl = $artifact
             $storageAccount = ("$artifactUrl////".Split('/')[2]).Split('.')[0]
             $artifactType = ("$artifactUrl////".Split('/')[3])
@@ -494,6 +496,7 @@ function AnalyzeRepo {
             $sasToken = "$($artifactUrl)?".Split('?')[1]
         }
         else {
+            Write-Host "Hello 002"
             $segments = "$artifact/////".Split('/')
             Write-Host = "Segments: $segments"
             $storageAccount = $segments[0];
@@ -506,6 +509,7 @@ function AnalyzeRepo {
             if (-not $artifactUrl) {
                 throw "No artifacts found for the artifact setting ($artifact) in $ALGoSettingsFile"
             }
+            Write-Host "Artifact URL = $artifactUrl"
             $version = $artifactUrl.Split('/')[4]
             $storageAccount = $artifactUrl.Split('/')[2]
         }
@@ -547,8 +551,10 @@ function AnalyzeRepo {
     }
     
     if (-not (@($settings.appFolders)+@($settings.testFolders))) {
+        Write-Host "Hello 003"
         Get-ChildItem -Path $baseFolder -Directory | Where-Object { Test-Path -Path (Join-Path $_.FullName "app.json") } | ForEach-Object {
             $folder = $_
+            Write-Host "Folder = $folder"
             $appJson = Get-Content (Join-Path $folder.FullName "app.json") -Encoding UTF8 | ConvertFrom-Json
             $isTestApp = $false
             if ($appJson.PSObject.Properties.Name -eq "dependencies") {
@@ -571,6 +577,7 @@ function AnalyzeRepo {
                 $settings.appFolders += @($_.Name)
             }
         }
+        Write-Host "AppFolders = $($settings.appFolders)"
     }
     Write-Host "Checking appFolders and testFolders"
     $dependencies = [ordered]@{}
@@ -586,6 +593,7 @@ function AnalyzeRepo {
         }
         $folders | ForEach-Object {
             $folderName = $_
+            Write-Host "Folder Name = $folderName"
             if ($dependencies.Contains($folderName)) {
                 throw "$descr $folderName, specified in $ALGoSettingsFile, is specified more than once."
             }
@@ -609,6 +617,7 @@ function AnalyzeRepo {
                 }
             }
             else {
+                Write-Host "Add Dependency $folderName"
                 $dependencies.Add("$folderName", @())
                 try {
                     $appJson = Get-Content $appJsonFile -Encoding UTF8 | ConvertFrom-Json
@@ -645,15 +654,18 @@ function AnalyzeRepo {
     }
 
     if (!$doNotCheckArtifactSetting) {
+        Write-Host "Hello 004"
         if ([Version]$settings.applicationDependency -gt [Version]$version) {
             throw "Application dependency is set to $($settings.applicationDependency), which isn't compatible with the artifact version $version"
         }
     }
 
     # unpack all dependencies and update app- and test dependencies from dependency apps
+    Write-Host "App Dependencies = $($settings.appDependencies)"
     $settings.appDependencies + $settings.testDependencies | ForEach-Object {
         $dep = $_
         if ($dep -is [string]) {
+            Write-Host "Hello 005"
             # TODO: handle pre-settings - documentation pending
         }
     }
@@ -661,28 +673,35 @@ function AnalyzeRepo {
     Write-Host "Updating app- and test Dependencies"
     $dependencies.Keys | ForEach-Object {
         $folderName = $_
+        Write-Host "Folder name 2 = $folderName"
         $appFolder = $settings.appFolders.Contains($folderName)
         if ($appFolder) { $prop = "appDependencies" } else { $prop = "testDependencies" }
         $dependencies."$_" | ForEach-Object {
+            Write-Host "Hello 006"
             $id = $_.Id
             $version = $_.version
             $exists = $settings."$prop" | Where-Object { $_ -is [System.Collections.Specialized.OrderedDictionary] -and $_.id -eq $id }
             if ($exists) {
+                Write-Host "Hello 007"
                 if ([Version]$version -gt [Version]$exists.Version) {
                     $exists.Version = $version
                 }
             }
             else {
+                Write-Host "Hello 008"
                 $settings."$prop" += @( [ordered]@{ "id" = $id; "version" = $_.version } )
             }
         }
     }
 
     Write-Host "Analyzing Test App Dependencies"
-    if ($settings.testFolders) { $settings.installTestRunner = $true }
+    if ($settings.testFolders) { 
+        $settings.installTestRunner = $true 
+    }
 
     $settings.appDependencies + $settings.testDependencies | ForEach-Object {
         $dep = $_
+        Write-Host "Dependency = $dep"
         if ($dep.GetType().Name -eq "OrderedDictionary") {
             if ($testRunnerApps.Contains($dep.id)) { $settings.installTestRunner = $true }
             if ($testFrameworkApps.Contains($dep.id)) { $settings.installTestFramework = $true }
@@ -692,10 +711,12 @@ function AnalyzeRepo {
     }
 
     if (-not $settings.testFolders) {
+        Write-Host "Hello 009"
         OutputWarning -message "No test apps found in testFolders in $ALGoSettingsFile"
         $doNotRunTests = $true
     }
     if (-not $settings.appFolders) {
+        Write-Host "Hello 010"
         OutputWarning -message "No apps found in appFolders in $ALGoSettingsFile"
     }
 
@@ -705,226 +726,226 @@ function AnalyzeRepo {
     }
 }
 
-function installModules {
-    Param(
-        [String[]] $modules
-    )
+# function installModules {
+#     Param(
+#         [String[]] $modules
+#     )
 
-    $modules | ForEach-Object {
-        if (-not (get-installedmodule -Name $_ -ErrorAction SilentlyContinue)) {
-            Write-Host "Installing module $_"
-            Install-Module $_ -Force | Out-Null
-        }
-    }
-    $modules | ForEach-Object { 
-        Write-Host "Importing module $_"
-        Import-Module $_ -DisableNameChecking -WarningAction SilentlyContinue | Out-Null
-    }
-}
+#     $modules | ForEach-Object {
+#         if (-not (get-installedmodule -Name $_ -ErrorAction SilentlyContinue)) {
+#             Write-Host "Installing module $_"
+#             Install-Module $_ -Force | Out-Null
+#         }
+#     }
+#     $modules | ForEach-Object { 
+#         Write-Host "Importing module $_"
+#         Import-Module $_ -DisableNameChecking -WarningAction SilentlyContinue | Out-Null
+#     }
+# }
 
-function CloneIntoNewFolder {
-    Param(
-        [string] $actor,
-        [string] $token,
-        [string] $branch
-    )
+# function CloneIntoNewFolder {
+#     Param(
+#         [string] $actor,
+#         [string] $token,
+#         [string] $branch
+#     )
 
-    $baseFolder = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
-    New-Item $baseFolder -ItemType Directory | Out-Null
-    Set-Location $baseFolder
-    $serverUri = [Uri]::new($env:GITHUB_SERVER_URL)
-    $serverUrl = "$($serverUri.Scheme)://$($actor):$($token)@$($serverUri.Host)/$($env:GITHUB_REPOSITORY)"
+#     $baseFolder = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
+#     New-Item $baseFolder -ItemType Directory | Out-Null
+#     Set-Location $baseFolder
+#     $serverUri = [Uri]::new($env:GITHUB_SERVER_URL)
+#     $serverUrl = "$($serverUri.Scheme)://$($actor):$($token)@$($serverUri.Host)/$($env:GITHUB_REPOSITORY)"
 
-    # Environment variables for hub commands
-    $env:GITHUB_USER = $actor
-    $env:GITHUB_TOKEN = $token
+#     # Environment variables for hub commands
+#     $env:GITHUB_USER = $actor
+#     $env:GITHUB_TOKEN = $token
 
-    # Configure git username and email
-    invoke-git config --global user.email "$actor@users.noreply.github.com"
-    invoke-git config --global user.name "$actor"
+#     # Configure git username and email
+#     invoke-git config --global user.email "$actor@users.noreply.github.com"
+#     invoke-git config --global user.name "$actor"
 
-    # Configure hub to use https
-    invoke-git config --global hub.protocol https
+#     # Configure hub to use https
+#     invoke-git config --global hub.protocol https
 
-    invoke-git clone $serverUrl
+#     invoke-git clone $serverUrl
 
-    Set-Location *
+#     Set-Location *
 
-    if ($branch) {
-        invoke-git checkout -b $branch
-    }
+#     if ($branch) {
+#         invoke-git checkout -b $branch
+#     }
 
-    $serverUrl
-}
+#     $serverUrl
+# }
 
-function CommitFromNewFolder {
-    Param(
-        [string] $severUrl,
-        [string] $commitMessage,
-        [string] $branch
-    )
+# function CommitFromNewFolder {
+#     Param(
+#         [string] $severUrl,
+#         [string] $commitMessage,
+#         [string] $branch
+#     )
 
-    invoke-git add *
-    if ($commitMessage.Length -gt 250) {
-        $commitMessage = "$($commitMessage.Substring(0,250))...)"
-    }
-    invoke-git commit --allow-empty -m "'$commitMessage'"
-    if ($branch) {
-        invoke-git push -u $serverUrl $branch
-        invoke-gh pr create --fill --head $branch --repo $env:GITHUB_REPOSITORY
-    }
-    else {
-        invoke-git push $serverUrl
-    }
-}
+#     invoke-git add *
+#     if ($commitMessage.Length -gt 250) {
+#         $commitMessage = "$($commitMessage.Substring(0,250))...)"
+#     }
+#     invoke-git commit --allow-empty -m "'$commitMessage'"
+#     if ($branch) {
+#         invoke-git push -u $serverUrl $branch
+#         invoke-gh pr create --fill --head $branch --repo $env:GITHUB_REPOSITORY
+#     }
+#     else {
+#         invoke-git push $serverUrl
+#     }
+# }
 
-function Select-Value {
-    Param(
-        [Parameter(Mandatory=$false)]
-        [string] $title,
-        [Parameter(Mandatory=$false)]
-        [string] $description,
-        [Parameter(Mandatory=$true)]
-        $options,
-        [Parameter(Mandatory=$false)]
-        [string] $default = "",
-        [Parameter(Mandatory=$true)]
-        [string] $question
-    )
+# function Select-Value {
+#     Param(
+#         [Parameter(Mandatory=$false)]
+#         [string] $title,
+#         [Parameter(Mandatory=$false)]
+#         [string] $description,
+#         [Parameter(Mandatory=$true)]
+#         $options,
+#         [Parameter(Mandatory=$false)]
+#         [string] $default = "",
+#         [Parameter(Mandatory=$true)]
+#         [string] $question
+#     )
 
-    if ($title) {
-        Write-Host -ForegroundColor Yellow $title
-        Write-Host -ForegroundColor Yellow ("-"*$title.Length)
-    }
-    if ($description) {
-        Write-Host $description
-        Write-Host
-    }
-    $offset = 0
-    $keys = @()
-    $values = @()
+#     if ($title) {
+#         Write-Host -ForegroundColor Yellow $title
+#         Write-Host -ForegroundColor Yellow ("-"*$title.Length)
+#     }
+#     if ($description) {
+#         Write-Host $description
+#         Write-Host
+#     }
+#     $offset = 0
+#     $keys = @()
+#     $values = @()
 
-    $options.GetEnumerator() | ForEach-Object {
-        Write-Host -ForegroundColor Yellow "$([char]($offset+97)) " -NoNewline
-        $keys += @($_.Key)
-        $values += @($_.Value)
-        if ($_.Key -eq $default) {
-            Write-Host -ForegroundColor Yellow $_.Value
-            $defaultAnswer = $offset
-        }
-        else {
-            Write-Host $_.Value
-        }
-        $offset++     
-    }
-    Write-Host
-    $answer = -1
-    do {
-        Write-Host "$question " -NoNewline
-        if ($defaultAnswer -ge 0) {
-            Write-Host "(default $([char]($defaultAnswer + 97))) " -NoNewline
-        }
-        $selection = (Read-Host).ToLowerInvariant()
-        if ($selection -eq "") {
-            if ($defaultAnswer -ge 0) {
-                $answer = $defaultAnswer
-            }
-            else {
-                Write-Host -ForegroundColor Red "No default value exists. " -NoNewline
-            }
-        }
-        else {
-            if (($selection.Length -ne 1) -or (([int][char]($selection)) -lt 97 -or ([int][char]($selection)) -ge (97+$offset))) {
-                Write-Host -ForegroundColor Red "Illegal answer. " -NoNewline
-            }
-            else {
-                $answer = ([int][char]($selection))-97
-            }
-        }
-        if ($answer -eq -1) {
-            if ($offset -eq 2) {
-                Write-Host -ForegroundColor Red "Please answer one letter, a or b"
-            }
-            else {
-                Write-Host -ForegroundColor Red "Please answer one letter, from a to $([char]($offset+97-1))"
-            }
-        }
-    } while ($answer -eq -1)
+#     $options.GetEnumerator() | ForEach-Object {
+#         Write-Host -ForegroundColor Yellow "$([char]($offset+97)) " -NoNewline
+#         $keys += @($_.Key)
+#         $values += @($_.Value)
+#         if ($_.Key -eq $default) {
+#             Write-Host -ForegroundColor Yellow $_.Value
+#             $defaultAnswer = $offset
+#         }
+#         else {
+#             Write-Host $_.Value
+#         }
+#         $offset++     
+#     }
+#     Write-Host
+#     $answer = -1
+#     do {
+#         Write-Host "$question " -NoNewline
+#         if ($defaultAnswer -ge 0) {
+#             Write-Host "(default $([char]($defaultAnswer + 97))) " -NoNewline
+#         }
+#         $selection = (Read-Host).ToLowerInvariant()
+#         if ($selection -eq "") {
+#             if ($defaultAnswer -ge 0) {
+#                 $answer = $defaultAnswer
+#             }
+#             else {
+#                 Write-Host -ForegroundColor Red "No default value exists. " -NoNewline
+#             }
+#         }
+#         else {
+#             if (($selection.Length -ne 1) -or (([int][char]($selection)) -lt 97 -or ([int][char]($selection)) -ge (97+$offset))) {
+#                 Write-Host -ForegroundColor Red "Illegal answer. " -NoNewline
+#             }
+#             else {
+#                 $answer = ([int][char]($selection))-97
+#             }
+#         }
+#         if ($answer -eq -1) {
+#             if ($offset -eq 2) {
+#                 Write-Host -ForegroundColor Red "Please answer one letter, a or b"
+#             }
+#             else {
+#                 Write-Host -ForegroundColor Red "Please answer one letter, from a to $([char]($offset+97-1))"
+#             }
+#         }
+#     } while ($answer -eq -1)
 
-    Write-Host -ForegroundColor Green "$($values[$answer]) selected"
-    Write-Host
-    $keys[$answer]
-}
+#     Write-Host -ForegroundColor Green "$($values[$answer]) selected"
+#     Write-Host
+#     $keys[$answer]
+# }
 
-function Enter-Value {
-    Param(
-        [Parameter(Mandatory=$false)]
-        [string] $title,
-        [Parameter(Mandatory=$false)]
-        [string] $description,
-        [Parameter(Mandatory=$false)]
-        $options,
-        [Parameter(Mandatory=$false)]
-        [string] $default = "",
-        [Parameter(Mandatory=$true)]
-        [string] $question,
-        [switch] $doNotConvertToLower,
-        [switch] $previousStep
-    )
+# function Enter-Value {
+#     Param(
+#         [Parameter(Mandatory=$false)]
+#         [string] $title,
+#         [Parameter(Mandatory=$false)]
+#         [string] $description,
+#         [Parameter(Mandatory=$false)]
+#         $options,
+#         [Parameter(Mandatory=$false)]
+#         [string] $default = "",
+#         [Parameter(Mandatory=$true)]
+#         [string] $question,
+#         [switch] $doNotConvertToLower,
+#         [switch] $previousStep
+#     )
 
-    if ($title) {
-        Write-Host -ForegroundColor Yellow $title
-        Write-Host -ForegroundColor Yellow ("-"*$title.Length)
-    }
-    if ($description) {
-        Write-Host $description
-        Write-Host
-    }
-    $answer = ""
-    do {
-        Write-Host "$question " -NoNewline
-        if ($options) {
-            Write-Host "($([string]::Join(', ', $options))) " -NoNewline
-        }
-        if ($default) {
-            Write-Host "(default $default) " -NoNewline
-        }
-        if ($doNotConvertToLower) {
-            $selection = Read-Host
-        }
-        else {
-            $selection = (Read-Host).ToLowerInvariant()
-        }
-        if ($selection -eq "") {
-            if ($default) {
-                $answer = $default
-            }
-            else {
-                Write-Host -ForegroundColor Red "No default value exists. "
-            }
-        }
-        else {
-            if ($options) {
-                $answer = $options | Where-Object { $_ -like "$selection*" }
-                if (-not ($answer)) {
-                    Write-Host -ForegroundColor Red "Illegal answer. Please answer one of the options."
-                }
-                elseif ($answer -is [Array]) {
-                    Write-Host -ForegroundColor Red "Multiple options match the answer. Please answer one of the options that matched the previous selection."
-                    $options = $answer
-                    $answer = $null
-                }
-            }
-            else {
-                $answer = $selection
-            }
-        }
-    } while (-not ($answer))
+#     if ($title) {
+#         Write-Host -ForegroundColor Yellow $title
+#         Write-Host -ForegroundColor Yellow ("-"*$title.Length)
+#     }
+#     if ($description) {
+#         Write-Host $description
+#         Write-Host
+#     }
+#     $answer = ""
+#     do {
+#         Write-Host "$question " -NoNewline
+#         if ($options) {
+#             Write-Host "($([string]::Join(', ', $options))) " -NoNewline
+#         }
+#         if ($default) {
+#             Write-Host "(default $default) " -NoNewline
+#         }
+#         if ($doNotConvertToLower) {
+#             $selection = Read-Host
+#         }
+#         else {
+#             $selection = (Read-Host).ToLowerInvariant()
+#         }
+#         if ($selection -eq "") {
+#             if ($default) {
+#                 $answer = $default
+#             }
+#             else {
+#                 Write-Host -ForegroundColor Red "No default value exists. "
+#             }
+#         }
+#         else {
+#             if ($options) {
+#                 $answer = $options | Where-Object { $_ -like "$selection*" }
+#                 if (-not ($answer)) {
+#                     Write-Host -ForegroundColor Red "Illegal answer. Please answer one of the options."
+#                 }
+#                 elseif ($answer -is [Array]) {
+#                     Write-Host -ForegroundColor Red "Multiple options match the answer. Please answer one of the options that matched the previous selection."
+#                     $options = $answer
+#                     $answer = $null
+#                 }
+#             }
+#             else {
+#                 $answer = $selection
+#             }
+#         }
+#     } while (-not ($answer))
 
-    Write-Host -ForegroundColor Green "$answer selected"
-    Write-Host
-    $answer
-}
+#     Write-Host -ForegroundColor Green "$answer selected"
+#     Write-Host
+#     $answer
+# }
 
 function GetContainerName([string] $project) {
     "bc$($project -replace "\W")$env:GITHUB_RUN_ID"
@@ -1243,40 +1264,40 @@ function ConvertTo-HashTable() {
     $ht
 }
 
-function CheckAndCreateProjectFolder {
-    Param(
-        [string] $project
-    )
+# function CheckAndCreateProjectFolder {
+#     Param(
+#         [string] $project
+#     )
 
-    if (-not $project) { $project -eq "." }
-    if ($project -ne ".") {
-        if (Test-Path $ALGoSettingsFile) {
-            Write-Host "Reading $ALGoSettingsFile"
-            $settingsJson = Get-Content $ALGoSettingsFile -Encoding UTF8 | ConvertFrom-Json
-            if ($settingsJson.appFolders.Count -eq 0 -and $settingsJson.testFolders.Count -eq 0) {
-                OutputWarning "Converting the repository to a multi-project repository as no other apps have been added previously."
-                New-Item $project -ItemType Directory | Out-Null
-                Move-Item -path $ALGoFolder -Destination $project
-                Set-Location $project
-            }
-            else {
-                throw "Repository is setup for a single project, cannot add a project. Move all appFolders, testFolders and the .AL-Go folder to a subdirectory in order to convert to a multi-project repository."
-            }
-        }
-        else {
-            if (!(Test-Path $project)) {
-                New-Item -Path (Join-Path $project $ALGoFolder) -ItemType Directory | Out-Null
-                Set-Location $project
-                OutputWarning "Project folder doesn't exist, creating a new project folder and a default settings file with country us. Please modify if needed."
-                [ordered]@{
-                    "country" = "us"
-                    "appFolders" = @()
-                    "testFolders" = @()
-                } | ConvertTo-Json | Set-Content $ALGoSettingsFile -Encoding UTF8
-            }
-            else {
-                Set-Location $project
-            }
-        }
-    }
-}
+#     if (-not $project) { $project -eq "." }
+#     if ($project -ne ".") {
+#         if (Test-Path $ALGoSettingsFile) {
+#             Write-Host "Reading $ALGoSettingsFile"
+#             $settingsJson = Get-Content $ALGoSettingsFile -Encoding UTF8 | ConvertFrom-Json
+#             if ($settingsJson.appFolders.Count -eq 0 -and $settingsJson.testFolders.Count -eq 0) {
+#                 OutputWarning "Converting the repository to a multi-project repository as no other apps have been added previously."
+#                 New-Item $project -ItemType Directory | Out-Null
+#                 Move-Item -path $ALGoFolder -Destination $project
+#                 Set-Location $project
+#             }
+#             else {
+#                 throw "Repository is setup for a single project, cannot add a project. Move all appFolders, testFolders and the .AL-Go folder to a subdirectory in order to convert to a multi-project repository."
+#             }
+#         }
+#         else {
+#             if (!(Test-Path $project)) {
+#                 New-Item -Path (Join-Path $project $ALGoFolder) -ItemType Directory | Out-Null
+#                 Set-Location $project
+#                 OutputWarning "Project folder doesn't exist, creating a new project folder and a default settings file with country us. Please modify if needed."
+#                 [ordered]@{
+#                     "country" = "us"
+#                     "appFolders" = @()
+#                     "testFolders" = @()
+#                 } | ConvertTo-Json | Set-Content $ALGoSettingsFile -Encoding UTF8
+#             }
+#             else {
+#                 Set-Location $project
+#             }
+#         }
+#     }
+# }
