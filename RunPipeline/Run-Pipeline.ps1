@@ -20,6 +20,7 @@ try {
     Write-Host "********** Start Run-Pipeline **************"
 
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
+    . (Join-Path -Path $PSScriptRoot -ChildPath "..\Github-Helper.ps1" -Resolve)
     $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE 
 
     # Pull docker image in the background
@@ -85,10 +86,10 @@ try {
     $doNotRunTests = $repo.doNotRunTests
     Write-Host "Do not run tests = $doNotRunTests"
  
-    #if ($repo.appDependencyProbingPaths) {
+    if ($repo.appDependencyProbingPaths) {
     Write-Host "Downloading dependencies ..."
     $installApps += Get-dependencies -probingPathsJson $repo.appDependencyProbingPaths -token $token       
-    #}
+    }
 
     # if ($repo.appDependencyProbingPaths) {
     #     Write-Host "Downloading dependencies ..."
