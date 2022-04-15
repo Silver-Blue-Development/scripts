@@ -453,6 +453,7 @@ function AnalyzeRepo {
     if (!$settings.Contains('enablePerTenantExtensionCop')) {
         Write-Host "Enable Per Tenant Extension Cop"
         $settings.Add('enablePerTenantExtensionCop', $true)
+        $settings.Add('enableAppSourceCop', $false)
     }
     #     if (!$settings.Contains('enableAppSourceCop')) {
     #         $settings.Add('enableAppSourceCop', $false)
