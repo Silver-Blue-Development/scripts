@@ -628,6 +628,7 @@ function AnalyzeRepo {
                                 }
                             }
                             else {
+                                Write-Host "Add Dependency to list $dependencies"
                                 $dependencies."$folderName" += @( [ordered]@{ "id" = $id; "version" = $_.version } )
                             }
                         }

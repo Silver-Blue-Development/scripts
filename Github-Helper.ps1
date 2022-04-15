@@ -15,6 +15,7 @@ function Get-dependencies {
     $downloadedList = @()
     $probingPathsJson | ForEach-Object {
         $dependency = $_
+        Write-Host "Dependency = $dependency"
         if (-not ($dependency.PsObject.Properties.name -eq "repo")) {
             throw "AppDependencyProbingPaths needs to contain a repo property, pointing to the repository on which you have a dependency"
         }
