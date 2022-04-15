@@ -471,17 +471,17 @@ function AnalyzeRepo {
     # else {
     #     throw "The type, specified in $ALGoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
     # }
-
-    Write-Host "Artifact = $($settings.artifact)"    
+ 
     $artifact = $settings.artifact
-    if ($artifact.Contains('{INSIDERSASTOKEN}')) {
-        if ($insiderSasToken) {
-            $artifact = $artifact.replace('{INSIDERSASTOKEN}', $insiderSasToken)
-        }
-        else {
-            throw "Artifact definition $artifact requires you to create a secret called InsiderSasToken, containing the Insider SAS Token from https://aka.ms/collaborate"
-        }
-    }
+    Write-Host "Artifact = $artifact"   
+    # if ($artifact.Contains('{INSIDERSASTOKEN}')) {
+    #     if ($insiderSasToken) {
+    #         $artifact = $artifact.replace('{INSIDERSASTOKEN}', $insiderSasToken)
+    #     }
+    #     else {
+    #         throw "Artifact definition $artifact requires you to create a secret called InsiderSasToken, containing the Insider SAS Token from https://aka.ms/collaborate"
+    #     }
+    # }
 
     if (!$doNotCheckArtifactSetting) {
         Write-Host "Checking artifact setting"
