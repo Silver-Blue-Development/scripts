@@ -33,7 +33,8 @@ function Get-dependencies {
         }
 
         Write-Host "Getting releases from $($dependency.repo)"
-        $repository = ([uri]$dependency.repo).AbsolutePath.Replace(".git", "").TrimStart("/")
+        #$repository = ([uri]$dependency.repo).AbsolutePath.Replace(".git", "").TrimStart("/")
+        $repository = $dependency.repo
         Write-Host "Repo = $repository"
 
         Write-Host "Release Status = Latest Build"
