@@ -40,6 +40,7 @@ function Get-dependencies {
         Write-Host "Release Status = Latest Build"
         $artifacts = GetArtifacts -token $dependency.authTokenSecret -api_url $api_url -repository $repository -mask $mask
         if ($dependency.version -ne "latest") {
+            Write-Host "Hello there!"
             $artifacts = $artifacts | Where-Object { ($_.tag_name -eq $dependency.version) }
         }    
             
