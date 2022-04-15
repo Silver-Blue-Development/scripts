@@ -22,9 +22,9 @@ function Get-dependencies {
         # if (-not ($dependency.PsObject.Properties.name -eq "AuthTokenSecret")) {
         #     $dependency | Add-Member -name "AuthTokenSecret" -MemberType NoteProperty -Value $token
         # }
-        if (-not ($dependency.PsObject.Properties.name -eq "Version")) {
-            $dependency | Add-Member -name "Version" -MemberType NoteProperty -Value "latest"
-        }
+        # if (-not ($dependency.PsObject.Properties.name -eq "Version")) {
+        #     $dependency | Add-Member -name "Version" -MemberType NoteProperty -Value "latest"
+        # }
         # if (-not ($dependency.PsObject.Properties.name -eq "Projects")) {
         #     $dependency | Add-Member -name "Projects" -MemberType NoteProperty -Value "*"
         # }
@@ -40,10 +40,10 @@ function Get-dependencies {
         Write-Host "Release Status = Latest Build"
 
         $artifacts = GetArtifacts -token $token -api_url $api_url -repository $repository -mask $mask
-        if ($dependency.version -ne "latest") {
-            Write-Host "Hello there!"
-            $artifacts = $artifacts | Where-Object { ($_.tag_name -eq $dependency.version) }
-        }    
+        # if ($dependency.version -ne "latest") {
+        #     Write-Host "Hello there!"
+        #     $artifacts = $artifacts | Where-Object { ($_.tag_name -eq $dependency.version) }
+        # }    
             
         $artifact = $artifacts | Select-Object -First 1
         if (!($artifact)) {
@@ -161,10 +161,8 @@ function GetArtifacts {
         [string] $mask = "Apps"
     )
 
-    Write-Host "Analyzing artifacts"
-    Write-Host "$api_url/repos/$repository/actions/artifacts"
-
     $uri = "$api_url/repos/$repository/actions/artifacts"
+    Write-Host $uri
 
     $artifacts = Invoke-WebRequest -UseBasicParsing -Headers (GetHeader -token $token) -Uri $uri | ConvertFrom-Json
     $artifacts.artifacts | Where-Object { $_.name -like "*$($mask)*" }
