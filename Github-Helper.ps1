@@ -4,7 +4,7 @@ function Get-dependencies {
         $token,
         [string] $api_url = $ENV:GITHUB_API_URL,
         [string] $saveToPath = (Join-Path $ENV:GITHUB_WORKSPACE "dependencies"),
-        [string] $mask = "-Apps-"
+        [string] $mask = "Apps"
     )
 
     if (!(Test-Path $saveToPath)) {
