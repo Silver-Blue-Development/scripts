@@ -436,7 +436,6 @@ function AnalyzeRepo {
     Param(
         [hashTable] $settings,
         [string] $baseFolder,
-        [string] $insiderSasToken,
         [switch] $doNotCheckArtifactSetting
     )
 
@@ -931,305 +930,305 @@ function GetContainerName([string] $project) {
     "bc$($project -replace "\W")$env:GITHUB_RUN_ID"
 }
 
-function CreateDevEnv {
-    Param(
-        [Parameter(Mandatory=$true)]
-        [ValidateSet('local','cloud')]
-        [string] $kind,
-        [ValidateSet('local','GitHubActions')]
-        [string] $caller = 'local',
-        [Parameter(Mandatory=$true)]
-        [string] $baseFolder,
-        [string] $userName = $env:Username,
-        [string] $bcContainerHelperPath = "",
+# function CreateDevEnv {
+#     Param(
+#         [Parameter(Mandatory=$true)]
+#         [ValidateSet('local','cloud')]
+#         [string] $kind,
+#         [ValidateSet('local','GitHubActions')]
+#         [string] $caller = 'local',
+#         [Parameter(Mandatory=$true)]
+#         [string] $baseFolder,
+#         [string] $userName = $env:Username,
+#         [string] $bcContainerHelperPath = "",
 
-        [Parameter(ParameterSetName='cloud')]
-        [Hashtable] $bcAuthContext = $null,
-        [Parameter(ParameterSetName='cloud')]
-        [Hashtable] $adminCenterApiCredentials = @{},
-        [Parameter(Mandatory=$true, ParameterSetName='cloud')]
-        [string] $environmentName,
-        [Parameter(ParameterSetName='cloud')]
-        [switch] $reuseExistingEnvironment,
+#         [Parameter(ParameterSetName='cloud')]
+#         [Hashtable] $bcAuthContext = $null,
+#         [Parameter(ParameterSetName='cloud')]
+#         [Hashtable] $adminCenterApiCredentials = @{},
+#         [Parameter(Mandatory=$true, ParameterSetName='cloud')]
+#         [string] $environmentName,
+#         [Parameter(ParameterSetName='cloud')]
+#         [switch] $reuseExistingEnvironment,
 
-        [Parameter(Mandatory=$true, ParameterSetName='local')]
-        [ValidateSet('Windows','UserPassword')]
-        [string] $auth,
-        [Parameter(Mandatory=$true, ParameterSetName='local')]
-        [pscredential] $credential,
-        [Parameter(ParameterSetName='local')]
-        [string] $containerName = "",
-        [string] $insiderSasToken = "",
-        [string] $LicenseFileUrl = ""
-    )
+#         [Parameter(Mandatory=$true, ParameterSetName='local')]
+#         [ValidateSet('Windows','UserPassword')]
+#         [string] $auth,
+#         [Parameter(Mandatory=$true, ParameterSetName='local')]
+#         [pscredential] $credential,
+#         [Parameter(ParameterSetName='local')]
+#         [string] $containerName = "",
+#         # [string] $insiderSasToken = "",
+#         [string] $LicenseFileUrl = ""
+#     )
 
-    if ($PSCmdlet.ParameterSetName -ne $kind) {
-        throw "Specified parameters doesn't match kind=$kind"
-    }
+#     if ($PSCmdlet.ParameterSetName -ne $kind) {
+#         throw "Specified parameters doesn't match kind=$kind"
+#     }
 
-    $runAlPipelineParams = @{}
-    $loadBcContainerHelper = ($bcContainerHelperPath -eq "")
-    if ($loadBcContainerHelper) {
-        $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $baseFolder
-    }
-    try {
-        if ($caller -eq "local") {
-            $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-            if (-not $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-                Check-BcContainerHelperPermissions -silent -fix
-            }
-        }
+#     $runAlPipelineParams = @{}
+#     $loadBcContainerHelper = ($bcContainerHelperPath -eq "")
+#     if ($loadBcContainerHelper) {
+#         $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $baseFolder
+#     }
+#     try {
+#         if ($caller -eq "local") {
+#             $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+#             if (-not $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+#                 Check-BcContainerHelperPermissions -silent -fix
+#             }
+#         }
 
-        $workflowName = "$($kind)DevEnv"
-        $params = @{
-            "baseFolder" = $baseFolder
-            "workflowName" = $workflowName
-        }
-        if ($caller -eq "local") { $params += @{ "userName" = $userName } }
-        $settings = ReadSettings @params
+#         $workflowName = "$($kind)DevEnv"
+#         $params = @{
+#             "baseFolder" = $baseFolder
+#             "workflowName" = $workflowName
+#         }
+#         if ($caller -eq "local") { $params += @{ "userName" = $userName } }
+#         $settings = ReadSettings @params
     
-        if ($caller -eq "GitHubActions") {
-            if ($kind -ne "cloud") {
-                OutputError -message "Unexpected. kind=$kind, caller=$caller"
-                exit
-            }
-            if ($adminCenterApiCredentials.Keys.Count -eq 0) {
-                OutputError -message "You need to add a secret called AdminCenterApiCredentials containing authentication for the admin Center API."
-                exit
-            }
-        }
-        else {
-            if (($settings.keyVaultName) -and -not ($bcAuthContext)) {
-                Write-Host "Reading Key Vault $($settings.keyVaultName)"
-                installModules -modules @('Az.KeyVault')
+#         # if ($caller -eq "GitHubActions") {
+#         #     if ($kind -ne "cloud") {
+#         #         OutputError -message "Unexpected. kind=$kind, caller=$caller"
+#         #         exit
+#         #     }
+#         #     if ($adminCenterApiCredentials.Keys.Count -eq 0) {
+#         #         OutputError -message "You need to add a secret called AdminCenterApiCredentials containing authentication for the admin Center API."
+#         #         exit
+#         #     }
+#         # }
+#         # else {
+#         #     if (($settings.keyVaultName) -and -not ($bcAuthContext)) {
+#         #         Write-Host "Reading Key Vault $($settings.keyVaultName)"
+#         #         installModules -modules @('Az.KeyVault')
 
-                if ($kind -eq "local") {
-                    $LicenseFileSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.LicenseFileUrlSecretName
-                    if ($LicenseFileSecret) { $LicenseFileUrl = $LicenseFileSecret.SecretValue | Get-PlainText }
+#         #         if ($kind -eq "local") {
+#         #             $LicenseFileSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.LicenseFileUrlSecretName
+#         #             if ($LicenseFileSecret) { $LicenseFileUrl = $LicenseFileSecret.SecretValue | Get-PlainText }
 
-                    $insiderSasTokenSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.InsiderSasTokenSecretName
-                    if ($insiderSasTokenSecret) { $insiderSasToken = $insiderSasTokenSecret.SecretValue | Get-PlainText }
+#         #             $insiderSasTokenSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.InsiderSasTokenSecretName
+#         #             if ($insiderSasTokenSecret) { $insiderSasToken = $insiderSasTokenSecret.SecretValue | Get-PlainText }
 
-                    # do not add codesign cert.
+#         #             # do not add codesign cert.
                     
-                    if ($settings.KeyVaultCertificateUrlSecretName) {
-                        $KeyVaultCertificateUrlSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.KeyVaultCertificateUrlSecretName
-                        if ($KeyVaultCertificateUrlSecret) {
-                            $keyVaultCertificatePasswordSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.keyVaultCertificatePasswordSecretName
-                            $keyVaultClientIdSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.keyVaultClientIdSecretName
-                            if (-not ($keyVaultCertificatePasswordSecret) -or -not ($keyVaultClientIdSecret)) {
-                                OutputError -message "When specifying a KeyVaultCertificateUrl secret in settings, you also need to provide a KeyVaultCertificatePassword secret and a KeyVaultClientId secret"
-                                exit
-                            }
-                            $runAlPipelineParams += @{ 
-                                "KeyVaultCertPfxFile" = $KeyVaultCertificateUrlSecret.SecretValue | Get-PlainText
-                                "keyVaultCertPfxPassword" = $keyVaultCertificatePasswordSecret.SecretValue
-                                "keyVaultClientId" = $keyVaultClientIdSecret.SecretValue | Get-PlainText
-                            }
-                        }
-                    }
-                }
-                elseif ($kind -eq "cloud") {
-                    $adminCenterApiCredentialsSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.AdminCenterApiCredentialsSecretName
-                    if ($adminCenterApiCredentialsSecret) { $AdminCenterApiCredentials = $adminCenterApiCredentialsSecret.SecretValue | Get-PlainText | ConvertFrom-Json | ConvertTo-HashTable }
-                    $legalParameters = @("RefreshToken","CliendId","ClientSecret","deviceCode")
-                    $adminCenterApiCredentials.Keys | ForEach-Object {
-                        if (-not ($legalParameters -contains $_)) {
-                            throw "$_ is an illegal property in adminCenterApiCredentials setting"
-                        }
-                    }
-                    if ($adminCenterApiCredentials.ContainsKey('ClientSecret')) {
-                        $adminCenterApiCredentials.ClientSecret = ConvertTo-SecureString -String $AdminCenterApiCredentials.ClientSecret -AsPlainText -Force
-                    }
-                }
-            }
-        }
+#         #             if ($settings.KeyVaultCertificateUrlSecretName) {
+#         #                 $KeyVaultCertificateUrlSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.KeyVaultCertificateUrlSecretName
+#         #                 if ($KeyVaultCertificateUrlSecret) {
+#         #                     $keyVaultCertificatePasswordSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.keyVaultCertificatePasswordSecretName
+#         #                     $keyVaultClientIdSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.keyVaultClientIdSecretName
+#         #                     if (-not ($keyVaultCertificatePasswordSecret) -or -not ($keyVaultClientIdSecret)) {
+#         #                         OutputError -message "When specifying a KeyVaultCertificateUrl secret in settings, you also need to provide a KeyVaultCertificatePassword secret and a KeyVaultClientId secret"
+#         #                         exit
+#         #                     }
+#         #                     $runAlPipelineParams += @{ 
+#         #                         "KeyVaultCertPfxFile" = $KeyVaultCertificateUrlSecret.SecretValue | Get-PlainText
+#         #                         "keyVaultCertPfxPassword" = $keyVaultCertificatePasswordSecret.SecretValue
+#         #                         "keyVaultClientId" = $keyVaultClientIdSecret.SecretValue | Get-PlainText
+#         #                     }
+#         #                 }
+#         #             }
+#         #         }
+#         #         elseif ($kind -eq "cloud") {
+#         #             $adminCenterApiCredentialsSecret = Get-AzKeyVaultSecret -VaultName $settings.keyVaultName -Name $settings.AdminCenterApiCredentialsSecretName
+#         #             if ($adminCenterApiCredentialsSecret) { $AdminCenterApiCredentials = $adminCenterApiCredentialsSecret.SecretValue | Get-PlainText | ConvertFrom-Json | ConvertTo-HashTable }
+#         #             $legalParameters = @("RefreshToken","CliendId","ClientSecret","deviceCode")
+#         #             $adminCenterApiCredentials.Keys | ForEach-Object {
+#         #                 if (-not ($legalParameters -contains $_)) {
+#         #                     throw "$_ is an illegal property in adminCenterApiCredentials setting"
+#         #                 }
+#         #             }
+#         #             if ($adminCenterApiCredentials.ContainsKey('ClientSecret')) {
+#         #                 $adminCenterApiCredentials.ClientSecret = ConvertTo-SecureString -String $AdminCenterApiCredentials.ClientSecret -AsPlainText -Force
+#         #             }
+#         #         }
+#         #     }
+#         # }
 
-        $params = @{
-            "settings" = $settings
-            "baseFolder" = $baseFolder
-        }
-        if ($kind -eq "local") {
-            $params += @{
-                "insiderSasToken" = $insiderSasToken
-            }
-        }
-        elseif ($kind -eq "cloud") {
-            $params += @{
-                "doNotCheckArtifactSetting" = $true
-            }
-        }
-        $repo = AnalyzeRepo @params
-        if ((-not $repo.appFolders) -and (-not $repo.testFolders)) {
-            Write-Host "Repository is empty, exiting"
-            exit
-        }
+#         $params = @{
+#             "settings" = $settings
+#             "baseFolder" = $baseFolder
+#         }
+#         if ($kind -eq "local") {
+#             $params += @{
+#                 "insiderSasToken" = $insiderSasToken
+#             }
+#         }
+#         elseif ($kind -eq "cloud") {
+#             $params += @{
+#                 "doNotCheckArtifactSetting" = $true
+#             }
+#         }
+#         $repo = AnalyzeRepo @params
+#         if ((-not $repo.appFolders) -and (-not $repo.testFolders)) {
+#             Write-Host "Repository is empty, exiting"
+#             exit
+#         }
 
-        if ($kind -eq "local" -and $repo.type -eq "AppSource App" ) {
-            if ($licenseFileUrl -eq "") {
-                OutputError -message "When building an AppSource App, you need to create a secret called LicenseFileUrl, containing a secure URL to your license file with permission to the objects used in the app."
-                exit
-            }
-        }
+#         if ($kind -eq "local" -and $repo.type -eq "AppSource App" ) {
+#             if ($licenseFileUrl -eq "") {
+#                 OutputError -message "When building an AppSource App, you need to create a secret called LicenseFileUrl, containing a secure URL to your license file with permission to the objects used in the app."
+#                 exit
+#             }
+#         }
 
-        $installApps = $repo.installApps
-        $installTestApps = $repo.installTestApps
+#         $installApps = $repo.installApps
+#         $installTestApps = $repo.installTestApps
 
-        if ($repo.versioningStrategy -eq -1) {
-            if ($kind -eq "cloud") { throw "Versioningstrategy -1 cannot be used on cloud" }
-            $artifactVersion = [Version]$repo.artifact.Split('/')[4]
-            $runAlPipelineParams += @{
-                "appVersion" = "$($artifactVersion.Major).$($artifactVersion.Minor)"
-                "appBuild" = "$($artifactVersion.Build)"
-                "appRevision" = "$($artifactVersion.Revision)"
-            }
-        }
-        elseif (($repo.versioningStrategy -band 16) -eq 16) {
-            $runAlPipelineParams += @{
-                "appVersion" = $repo.repoVersion
-            }
-        }
+#         if ($repo.versioningStrategy -eq -1) {
+#             if ($kind -eq "cloud") { throw "Versioningstrategy -1 cannot be used on cloud" }
+#             $artifactVersion = [Version]$repo.artifact.Split('/')[4]
+#             $runAlPipelineParams += @{
+#                 "appVersion" = "$($artifactVersion.Major).$($artifactVersion.Minor)"
+#                 "appBuild" = "$($artifactVersion.Build)"
+#                 "appRevision" = "$($artifactVersion.Revision)"
+#             }
+#         }
+#         elseif (($repo.versioningStrategy -band 16) -eq 16) {
+#             $runAlPipelineParams += @{
+#                 "appVersion" = $repo.repoVersion
+#             }
+#         }
 
-        $buildArtifactFolder = Join-Path $baseFolder "output"
-        if (Test-Path $buildArtifactFolder) {
-            Get-ChildItem -Path $buildArtifactFolder -Include * -File | ForEach-Object { $_.Delete()}
-        }
-        else {
-            New-Item $buildArtifactFolder -ItemType Directory | Out-Null
-        }
+#         $buildArtifactFolder = Join-Path $baseFolder "output"
+#         if (Test-Path $buildArtifactFolder) {
+#             Get-ChildItem -Path $buildArtifactFolder -Include * -File | ForEach-Object { $_.Delete()}
+#         }
+#         else {
+#             New-Item $buildArtifactFolder -ItemType Directory | Out-Null
+#         }
     
-        $allTestResults = "testresults*.xml"
-        $testResultsFile = Join-Path $baseFolder "TestResults.xml"
-        $testResultsFiles = Join-Path $baseFolder $allTestResults
-        if (Test-Path $testResultsFiles) {
-            Remove-Item $testResultsFiles -Force
-        }
+#         $allTestResults = "testresults*.xml"
+#         $testResultsFile = Join-Path $baseFolder "TestResults.xml"
+#         $testResultsFiles = Join-Path $baseFolder $allTestResults
+#         if (Test-Path $testResultsFiles) {
+#             Remove-Item $testResultsFiles -Force
+#         }
     
-        Set-Location $baseFolder
-        $runAlPipelineOverrides | ForEach-Object {
-            $scriptName = $_
-            $scriptPath = Join-Path $ALGoFolder "$ScriptName.ps1"
-            if (Test-Path -Path $scriptPath -Type Leaf) {
-                Write-Host "Add override for $scriptName"
-                $runAlPipelineParams += @{
-                    "$scriptName" = (Get-Command $scriptPath | Select-Object -ExpandProperty ScriptBlock)
-                }
-            }
-        }
+#         Set-Location $baseFolder
+#         $runAlPipelineOverrides | ForEach-Object {
+#             $scriptName = $_
+#             $scriptPath = Join-Path $ALGoFolder "$ScriptName.ps1"
+#             if (Test-Path -Path $scriptPath -Type Leaf) {
+#                 Write-Host "Add override for $scriptName"
+#                 $runAlPipelineParams += @{
+#                     "$scriptName" = (Get-Command $scriptPath | Select-Object -ExpandProperty ScriptBlock)
+#                 }
+#             }
+#         }
 
-        if ($kind -eq "local") {
-            $runAlPipelineParams += @{
-                "artifact" = $repo.artifact.replace('{INSIDERSASTOKEN}',$insiderSasToken)
-                "auth" = $auth
-                "credential" = $credential
-            }
-            if ($containerName) {
-                $runAlPipelineParams += @{
-                    "updateLaunchJson" = "Local Sandbox ($containerName)"
-                    "containerName" = $containerName
-                }
-            }
-            else {
-                $runAlPipelineParams += @{
-                    "updateLaunchJson" = "Local Sandbox"
-                }
-            }
-        }
-        elseif ($kind -eq "cloud") {
-            if ($runAlPipelineParams.ContainsKey('NewBcContainer')) {
-                throw "Overriding NewBcContainer is not allowed when running cloud DevEnv"
-            }
+#         if ($kind -eq "local") {
+#             $runAlPipelineParams += @{
+#                 "artifact" = $repo.artifact.replace('{INSIDERSASTOKEN}',$insiderSasToken)
+#                 "auth" = $auth
+#                 "credential" = $credential
+#             }
+#             if ($containerName) {
+#                 $runAlPipelineParams += @{
+#                     "updateLaunchJson" = "Local Sandbox ($containerName)"
+#                     "containerName" = $containerName
+#                 }
+#             }
+#             else {
+#                 $runAlPipelineParams += @{
+#                     "updateLaunchJson" = "Local Sandbox"
+#                 }
+#             }
+#         }
+#         elseif ($kind -eq "cloud") {
+#             if ($runAlPipelineParams.ContainsKey('NewBcContainer')) {
+#                 throw "Overriding NewBcContainer is not allowed when running cloud DevEnv"
+#             }
             
-            if ($bcAuthContext) {
-                 $authContext = Renew-BcAuthContext $bcAuthContext
-            }
-            else {
-                $authContext = New-BcAuthContext @AdminCenterApiCredentials -includeDeviceLogin:($caller -eq "local")
-            }
+#             if ($bcAuthContext) {
+#                  $authContext = Renew-BcAuthContext $bcAuthContext
+#             }
+#             else {
+#                 $authContext = New-BcAuthContext @AdminCenterApiCredentials -includeDeviceLogin:($caller -eq "local")
+#             }
 
-            $existingEnvironment = Get-BcEnvironments -bcAuthContext $authContext | Where-Object { $_.Name -eq $environmentName }
-            if ($existingEnvironment) {
-                if ($existingEnvironment.type -ne "Sandbox") {
-                    throw "Environment $environmentName already exists and it is not a sandbox environment"
-                }
-                if (!$reuseExistingEnvironment) {
-                    Remove-BcEnvironment -bcAuthContext $authContext -environment $environmentName
-                    $existingEnvironment = $null
-                }
-            }
-            if ($existingEnvironment) {
-                $countryCode = $existingEnvironment.CountryCode.ToLowerInvariant()
-                $baseApp = Get-BcPublishedApps -bcAuthContext $authContext -environment $environmentName | Where-Object { $_.Name -eq "Base Application" }
-            }
-            else {
-                $countryCode = $repo.country
-                New-BcEnvironment -bcAuthContext $authContext -environment $environmentName -countryCode $countryCode -environmentType "Sandbox" | Out-Null
-                do {
-                    Start-Sleep -Seconds 10
-                    $baseApp = Get-BcPublishedApps -bcAuthContext $authContext -environment $environmentName | Where-Object { $_.Name -eq "Base Application" }
-                } while (!($baseApp))
-                $baseapp | Out-Host
-            }
+#             $existingEnvironment = Get-BcEnvironments -bcAuthContext $authContext | Where-Object { $_.Name -eq $environmentName }
+#             if ($existingEnvironment) {
+#                 if ($existingEnvironment.type -ne "Sandbox") {
+#                     throw "Environment $environmentName already exists and it is not a sandbox environment"
+#                 }
+#                 if (!$reuseExistingEnvironment) {
+#                     Remove-BcEnvironment -bcAuthContext $authContext -environment $environmentName
+#                     $existingEnvironment = $null
+#                 }
+#             }
+#             if ($existingEnvironment) {
+#                 $countryCode = $existingEnvironment.CountryCode.ToLowerInvariant()
+#                 $baseApp = Get-BcPublishedApps -bcAuthContext $authContext -environment $environmentName | Where-Object { $_.Name -eq "Base Application" }
+#             }
+#             else {
+#                 $countryCode = $repo.country
+#                 New-BcEnvironment -bcAuthContext $authContext -environment $environmentName -countryCode $countryCode -environmentType "Sandbox" | Out-Null
+#                 do {
+#                     Start-Sleep -Seconds 10
+#                     $baseApp = Get-BcPublishedApps -bcAuthContext $authContext -environment $environmentName | Where-Object { $_.Name -eq "Base Application" }
+#                 } while (!($baseApp))
+#                 $baseapp | Out-Host
+#             }
             
-            $artifact = Get-BCArtifactUrl `
-                -country $countryCode `
-                -version $baseApp.Version `
-                -select Closest
+#             $artifact = Get-BCArtifactUrl `
+#                 -country $countryCode `
+#                 -version $baseApp.Version `
+#                 -select Closest
             
-            if ($artifact) {
-                Write-Host "Using Artifacts: $artifact"
-            }
-            else {
-                throw "No artifacts available"
-            }
+#             if ($artifact) {
+#                 Write-Host "Using Artifacts: $artifact"
+#             }
+#             else {
+#                 throw "No artifacts available"
+#             }
 
-            $runAlPipelineParams += @{
-                "artifact" = $artifact
-                "bcAuthContext" = $authContext
-                "environment" = $environmentName
-                "containerName" = "bcServerFilesOnly"
-                "updateLaunchJson" = "Cloud Sandbox ($environmentName)"
-            }
-        }
+#             $runAlPipelineParams += @{
+#                 "artifact" = $artifact
+#                 "bcAuthContext" = $authContext
+#                 "environment" = $environmentName
+#                 "containerName" = "bcServerFilesOnly"
+#                 "updateLaunchJson" = "Cloud Sandbox ($environmentName)"
+#             }
+#         }
         
-        Run-AlPipeline @runAlPipelineParams `
-            -pipelinename $workflowName `
-            -imageName "" `
-            -memoryLimit $repo.memoryLimit `
-            -baseFolder $baseFolder `
-            -licenseFile $LicenseFileUrl `
-            -installApps $installApps `
-            -installTestApps $installTestApps `
-            -installOnlyReferencedApps:$repo.installOnlyReferencedApps `
-            -appFolders $repo.appFolders `
-            -testFolders $repo.testFolders `
-            -testResultsFile $testResultsFile `
-            -testResultsFormat 'JUnit' `
-            -installTestRunner:$repo.installTestRunner `
-            -installTestFramework:$repo.installTestFramework `
-            -installTestLibraries:$repo.installTestLibraries `
-            -installPerformanceToolkit:$repo.installPerformanceToolkit `
-            -enableCodeCop:$repo.enableCodeCop `
-            -enableAppSourceCop:$repo.enableAppSourceCop `
-            -enablePerTenantExtensionCop:$repo.enablePerTenantExtensionCop `
-            -enableUICop:$repo.enableUICop `
-            -customCodeCops:$repo.customCodeCops `
-            -azureDevOps:($caller -eq 'AzureDevOps') `
-            -gitLab:($caller -eq 'GitLab') `
-            -gitHubActions:($caller -eq 'GitHubActions') `
-            -failOn $repo.failOn `
-            -rulesetFile $repo.rulesetFile `
-            -AppSourceCopMandatoryAffixes $repo.appSourceCopMandatoryAffixes `
-            -doNotRunTests `
-            -useDevEndpoint `
-            -keepContainer
-    }
-    finally {
-        if ($loadBcContainerHelper) {
-            CleanupAfterBcContainerHelper -bcContainerHelperPath $bcContainerHelperPath
-        }
-    }
-}
+#         Run-AlPipeline @runAlPipelineParams `
+#             -pipelinename $workflowName `
+#             -imageName "" `
+#             -memoryLimit $repo.memoryLimit `
+#             -baseFolder $baseFolder `
+#             -licenseFile $LicenseFileUrl `
+#             -installApps $installApps `
+#             -installTestApps $installTestApps `
+#             -installOnlyReferencedApps:$repo.installOnlyReferencedApps `
+#             -appFolders $repo.appFolders `
+#             -testFolders $repo.testFolders `
+#             -testResultsFile $testResultsFile `
+#             -testResultsFormat 'JUnit' `
+#             -installTestRunner:$repo.installTestRunner `
+#             -installTestFramework:$repo.installTestFramework `
+#             -installTestLibraries:$repo.installTestLibraries `
+#             -installPerformanceToolkit:$repo.installPerformanceToolkit `
+#             -enableCodeCop:$repo.enableCodeCop `
+#             -enableAppSourceCop:$repo.enableAppSourceCop `
+#             -enablePerTenantExtensionCop:$repo.enablePerTenantExtensionCop `
+#             -enableUICop:$repo.enableUICop `
+#             -customCodeCops:$repo.customCodeCops `
+#             -azureDevOps:($caller -eq 'AzureDevOps') `
+#             -gitLab:($caller -eq 'GitLab') `
+#             -gitHubActions:($caller -eq 'GitHubActions') `
+#             -failOn $repo.failOn `
+#             -rulesetFile $repo.rulesetFile `
+#             -AppSourceCopMandatoryAffixes $repo.appSourceCopMandatoryAffixes `
+#             -doNotRunTests `
+#             -useDevEndpoint `
+#             -keepContainer
+#     }
+#     finally {
+#         if ($loadBcContainerHelper) {
+#             CleanupAfterBcContainerHelper -bcContainerHelperPath $bcContainerHelperPath
+#         }
+#     }
+# }
 
 function ConvertTo-HashTable() {
     [CmdletBinding()]
