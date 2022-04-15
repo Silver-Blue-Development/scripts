@@ -84,7 +84,6 @@ try {
     Write-Host "Do not build tests = $doNotBuildTests"
     $doNotRunTests = $repo.doNotRunTests
     Write-Host "Do not run tests = $doNotRunTests"
-    Write-Host "Dependencies found = $($repo.dependencies)"
  
     #if ($repo.appDependencyProbingPaths) {
     Write-Host "Downloading dependencies ..."
