@@ -75,7 +75,7 @@ try {
     # }
 
     $artifact = $repo.artifact
-    Write-Host = "Artifcat = $artifact"
+    Write-Host = "Artifact = $artifact"
     $installApps = $repo.installApps
     Write-Host "Install Apps = $installApps"
     $installTestApps = $repo.installTestApps
