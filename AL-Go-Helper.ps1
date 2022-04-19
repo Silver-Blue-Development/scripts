@@ -207,34 +207,39 @@ function DownloadAndImportBcContainerHelper {
 
     $params = @{ "ExportTelemetryFunctions" = $true }
     if ($baseFolder) {
+        Write-Host "BaseFolder = true"
         $repoSettingsPath = Join-Path $baseFolder $repoSettingsFile
         if (-not (Test-Path $repoSettingsPath)) {
+            Write-Host "Hello 001"
             $repoSettingsPath = Join-Path $baseFolder "..\$repoSettingsFile"
         }
         if (Test-Path $repoSettingsPath) {
+            Write-Host "Hello 002"
             if (-not $BcContainerHelperVersion) {
+                Write-Host "Hello 003"
                 $repoSettings = Get-Content $repoSettingsPath -Encoding UTF8 | ConvertFrom-Json | ConvertTo-HashTable
                 if ($repoSettings.ContainsKey("BcContainerHelperVersion")) {
+                    Write-Host "Hello 004"
                     $BcContainerHelperVersion = $repoSettings.BcContainerHelperVersion
                 }
             }
             $params += @{ "bcContainerHelperConfigFile" = $repoSettingsPath }
         }
     }
-    if (-not $BcContainerHelperVersion) {
+    # if (-not $BcContainerHelperVersion) {
         $BcContainerHelperVersion = "latest"
-    }
+    # }
 
-    if ($bcContainerHelperVersion -eq "none") {
-        $tempName = ""
-        $module = Get-Module BcContainerHelper
-        if (-not $module) {
-            OutputError "When setting BcContainerHelperVersion to none, you need to ensure that BcContainerHelper is installed on the build agent"
-        }
+    # if ($bcContainerHelperVersion -eq "none") {
+    #     $tempName = ""
+    #     $module = Get-Module BcContainerHelper
+    #     if (-not $module) {
+    #         OutputError "When setting BcContainerHelperVersion to none, you need to ensure that BcContainerHelper is installed on the build agent"
+    #     }
 
-        $BcContainerHelperPath = Join-Path (Split-Path $module.Path -parent) "BcContainerHelper.ps1" -Resolve
-    }
-    else {
+    #     $BcContainerHelperPath = Join-Path (Split-Path $module.Path -parent) "BcContainerHelper.ps1" -Resolve
+    # }
+    # else {
         $tempName = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
         $webclient = New-Object System.Net.WebClient
         if ($BcContainerHelperVersion -eq "dev") {
@@ -254,7 +259,7 @@ function DownloadAndImportBcContainerHelper {
         Remove-Item -Path "$tempName.zip"
 
         $BcContainerHelperPath = (Get-Item -Path (Join-Path $tempName "*\BcContainerHelper.ps1")).FullName
-    }
+    # }
     . $BcContainerHelperPath @params
     $tempName
 }
