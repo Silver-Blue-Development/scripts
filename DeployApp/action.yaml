@@ -4,10 +4,14 @@ inputs:
     description: Specifies the path to the apps
     required: true
     default: ''
+  tenants:
+    descripton: Specifies in which tenants the app should be installed
+    required: true
+    default: ''
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/Deploy-App.ps1 -artifacts '${{ inputs.artifacts }}'
+    - run: ${{ github.action_path }}/Deploy-App.ps1 -artifacts '${{ inputs.artifacts }}' -tenants '${{ inputs.tenants }}'
       id: deployapp
       shell: PowerShell
 branding:

@@ -1,6 +1,8 @@
 Param(
     [Parameter(HelpMessage = "Artifacts to deploy", Mandatory = $true)]
-    [string] $artifacts
+    [string] $artifacts,
+    [Parameter(HelpMessage = "Tenants to install the app in", Mandatory = $true)]
+    [string[]] $tenants
 )
 
 $ErrorActionPreference = "Stop"
@@ -58,10 +60,13 @@ try {
                 Sync-NAVApp -ServerInstance BC190 -Tenant bosman -Name $AppInfo.Name -Version $AppInfo.Version 
                 Write-Host "App $($AppInfo.Name) was Synced to BC190 Tenant bosman"
 
-                Start-NAVAppDataUpgrade -ServerInstance BC190 -Name $AppInfo.Name -Version $AppInfo.Version -Tenant bosman 
-                Write-Host "Data upgrade for app $($AppInfo.Name) with version $($AppInfo.Version) was started on BC190"
-                #Install-NAVApp -ServerInstance BC190 -Name $AppInfo.Name -Version $AppInfo.Version -Tenant bosman        
-                Write-Host "App $($AppInfo.Name) with version $($AppInfo.Version) was installed on BC190 Tenant Bosman"
+                foreach ($installTenant in $tenants) {    
+                    Write-Host "Installing app on tenant $_"               
+                    Start-NAVAppDataUpgrade -ServerInstance BC190 -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant 
+                    Write-Host "Data upgrade for app $($AppInfo.Name) with version $($AppInfo.Version) was started on BC190 Tenant $installTenant"
+                    #Install-NAVApp -ServerInstance BC190 -Name $AppInfo.Name -Version $AppInfo.Version -Tenant bosman        
+                    Write-Host "App $($AppInfo.Name) with version $($AppInfo.Version) was installed on BC190 Tenant $installTenant"
+                }
             }
         }
         catch {
