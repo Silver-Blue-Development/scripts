@@ -209,10 +209,10 @@ function DownloadAndImportBcContainerHelper {
     if ($baseFolder) {
         Write-Host "BaseFolder = true"
         $repoSettingsPath = Join-Path $baseFolder $repoSettingsFile
-        if (-not (Test-Path $repoSettingsPath)) {
-            Write-Host "Hello 001"
-            $repoSettingsPath = Join-Path $baseFolder "..\$repoSettingsFile"
-        }
+        # if (-not (Test-Path $repoSettingsPath)) {
+        #     Write-Host "Hello 001"
+        #     $repoSettingsPath = Join-Path $baseFolder "..\$repoSettingsFile"
+        # }
         if (Test-Path $repoSettingsPath) {
             Write-Host "Hello 002"
             if (-not $BcContainerHelperVersion) {
@@ -221,13 +221,15 @@ function DownloadAndImportBcContainerHelper {
                 if ($repoSettings.ContainsKey("BcContainerHelperVersion")) {
                     Write-Host "Hello 004"
                     $BcContainerHelperVersion = $repoSettings.BcContainerHelperVersion
+                    Write-Host "BCContainerHelper Version = $BcContainerHelperVersion"
                 }
             }
+            Write-Host "Repo Settings Path = $repoSettingsPath"
             $params += @{ "bcContainerHelperConfigFile" = $repoSettingsPath }
         }
     }
     # if (-not $BcContainerHelperVersion) {
-        $BcContainerHelperVersion = "latest"
+    #    $BcContainerHelperVersion = "latest"
     # }
 
     # if ($bcContainerHelperVersion -eq "none") {
@@ -242,19 +244,19 @@ function DownloadAndImportBcContainerHelper {
     # else {
         $tempName = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
         $webclient = New-Object System.Net.WebClient
-        if ($BcContainerHelperVersion -eq "dev") {
-            Write-Host "Downloading BcContainerHelper developer version"
-            $webclient.DownloadFile("https://github.com/microsoft/navcontainerhelper/archive/dev.zip", "$tempName.zip")
+        # if ($BcContainerHelperVersion -eq "dev") {
+        #     Write-Host "Downloading BcContainerHelper developer version"
+        #     $webclient.DownloadFile("https://github.com/microsoft/navcontainerhelper/archive/dev.zip", "$tempName.zip")
+        # }
+        # else {
+        Write-Host "Downloading BcContainerHelper $BcContainerHelperVersion version"
+        try {
+            $webclient.DownloadFile("https://bccontainerhelper.azureedge.net/public/$($BcContainerHelperVersion).zip", "$tempName.zip")
         }
-        else {
-            Write-Host "Downloading BcContainerHelper $BcContainerHelperVersion version"
-            try {
-                $webclient.DownloadFile("https://bccontainerhelper.azureedge.net/public/$($BcContainerHelperVersion).zip", "$tempName.zip")
-            }
-            catch {
-                $webclient.DownloadFile("https://bccontainerhelper.blob.core.windows.net/public/$($BcContainerHelperVersion).zip", "$tempName.zip")        
-            }
+        catch {
+            $webclient.DownloadFile("https://bccontainerhelper.blob.core.windows.net/public/$($BcContainerHelperVersion).zip", "$tempName.zip")        
         }
+        #}
         Expand-7zipArchive -Path "$tempName.zip" -DestinationPath $tempName
         Remove-Item -Path "$tempName.zip"
 
