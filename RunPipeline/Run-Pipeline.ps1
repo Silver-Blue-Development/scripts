@@ -70,13 +70,6 @@ try {
         exit
     }
 
-    # if ($repo.type -eq "AppSource App" ) {
-    #     if ($licenseFileUrl -eq "") {
-    #         OutputError -message "When building an AppSource App, you need to create a secret called LicenseFileUrl, containing a secure URL to your license file with permission to the objects used in the app."
-    #         exit
-    #     }
-    # }
-
     $artifact = $repo.artifact
     Write-Host = "Artifact = $artifact"
     $installApps = $repo.installApps
@@ -92,28 +85,6 @@ try {
     Write-Host "Downloading dependencies ..."
     $installApps += Get-dependencies -probingPathsJson $repo.appDependencyProbingPaths -token $gitHubPAT      
     }
-
-    # if ($repo.appDependencyProbingPaths) {
-    #     Write-Host "Downloading dependencies ..."
-    #     $installApps += Get-dependencies -probingPathsJson $repo.appDependencyProbingPaths -token $token -mask "-Apps-"
-    #     ForEach-Object {
-    #         $installTestApps += "($_)"          
-    #     }
-    # }
-    
-    # if ($CodeSignCertificateUrl -and $CodeSignCertificatePassword) {
-    #     $runAlPipelineParams += @{ 
-    #         "CodeSignCertPfxFile" = $codeSignCertificateUrl
-    #         "CodeSignCertPfxPassword" = ConvertTo-SecureString -string $codeSignCertificatePassword -AsPlainText -Force
-    #     }
-    # }
-    # if ($KeyVaultCertificateUrl -and $KeyVaultCertificatePassword -and $KeyVaultClientId) {
-    #     $runAlPipelineParams += @{ 
-    #         "KeyVaultCertPfxFile" = $KeyVaultCertificateUrl
-    #         "keyVaultCertPfxPassword" = ConvertTo-SecureString -string $keyVaultCertificatePassword -AsPlainText -Force
-    #         "keyVaultClientId" = $keyVaultClientId
-    #     }
-    # }
 
     $previousApps = @()
     if ($repo.skipUpgrade) {

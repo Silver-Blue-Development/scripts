@@ -19,31 +19,13 @@ function Get-dependencies {
         if (-not ($dependency.PsObject.Properties.name -eq "repo")) {
             throw "AppDependencyProbingPaths needs to contain a repo property, pointing to the repository on which you have a dependency"
         }
-        # if (-not ($dependency.PsObject.Properties.name -eq "AuthTokenSecret")) {
-        #     $dependency | Add-Member -name "AuthTokenSecret" -MemberType NoteProperty -Value $token
-        # }
-        # if (-not ($dependency.PsObject.Properties.name -eq "Version")) {
-        #     $dependency | Add-Member -name "Version" -MemberType NoteProperty -Value "latest"
-        # }
-        # if (-not ($dependency.PsObject.Properties.name -eq "Projects")) {
-        #     $dependency | Add-Member -name "Projects" -MemberType NoteProperty -Value "*"
-        # }
-        # if (-not ($dependency.PsObject.Properties.name -eq "release_status")) {
-        #     $dependency | Add-Member -name "release_status" -MemberType NoteProperty -Value "latestBuild"
-        # }
 
-        #Write-Host "Getting releases from $($dependency.repo)"
-        #$repository = ([uri]$dependency.repo).AbsolutePath.Replace(".git", "").TrimStart("/")
         $repository = $dependency.repo
 
         Write-Host "Repo = $repository"
         Write-Host "Release Status = Latest Build"
 
         $artifacts = GetArtifacts -token $token -api_url $api_url -repository $repository -mask $mask
-        # if ($dependency.version -ne "latest") {
-        #     Write-Host "Hello there!"
-        #     $artifacts = $artifacts | Where-Object { ($_.tag_name -eq $dependency.version) }
-        # }    
             
         $artifact = $artifacts | Select-Object -First 1
         if (!($artifact)) {
@@ -79,7 +61,6 @@ function GetHeader {
     $headers = @{ "Accept" = $accept }
     if (![string]::IsNullOrEmpty($token)) {
         $headers["Authorization"] = "bearer $token"
-        #$headers["Authorization"] = "token $token"
     }
 
     return $headers
