@@ -8,7 +8,7 @@ Set-StrictMode -Version 2.0
 
 try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
-    #$BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE  //Only when github runner
+    $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE  #Only when github runner
 
     if ($project  -eq ".") { $project = "" }
 
@@ -43,5 +43,5 @@ catch {
     exit
 }
 finally {    
-    #CleanupAfterBcContainerHelper -bcContainerHelperPath $bcContainerHelperPath  //Only when github runner
+    CleanupAfterBcContainerHelper -bcContainerHelperPath $bcContainerHelperPath  #Only when github runner
 }
