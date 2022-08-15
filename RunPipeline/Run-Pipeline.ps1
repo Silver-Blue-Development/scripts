@@ -208,7 +208,8 @@ try {
         -buildArtifactFolder $buildArtifactFolder `
         -CreateRuntimePackages:$CreateRuntimePackages `
         -appBuild $appBuild -appRevision $appRevision `
-        -uninstallRemovedApps
+        -uninstallRemovedApps `
+        -isolation 'hyperv'
 }
 catch {
     OutputError -message $_.Exception.Message
