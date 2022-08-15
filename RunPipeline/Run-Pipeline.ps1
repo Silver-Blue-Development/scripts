@@ -25,6 +25,9 @@ try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\Github-Helper.ps1" -Resolve)
     $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE 
 
+    Write-Host "Check Container Helper Permissions"
+    Check-BcContainerHelperPermissions -Fix
+
     # Pull docker image in the background
     $genericImageName = Get-BestGenericImageName
     Start-Job -ScriptBlock {
