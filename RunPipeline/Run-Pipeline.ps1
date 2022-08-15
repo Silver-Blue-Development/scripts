@@ -23,7 +23,7 @@ try {
 
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\Github-Helper.ps1" -Resolve)
-    $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE 
+    #$BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE   //Only when github runner
 
     Write-Host "Check Container Helper Permissions"
     Check-BcContainerHelperPermissions -Fix
@@ -213,6 +213,6 @@ try {
 catch {
     OutputError -message $_.Exception.Message
 }
-finally {
-    CleanupAfterBcContainerHelper -bcContainerHelperPath $bcContainerHelperPath
+finally {    
+    #CleanupAfterBcContainerHelper -bcContainerHelperPath $bcContainerHelperPath  //Only when github runner
 }
