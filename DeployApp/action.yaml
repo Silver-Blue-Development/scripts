@@ -8,6 +8,7 @@ inputs:
     descripton: Specifies in which tenants the app should be installed
     required: true
     default: ''
+    is-array: true
 runs:
   using: composite
   steps:
