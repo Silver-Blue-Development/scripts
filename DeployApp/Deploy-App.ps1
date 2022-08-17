@@ -60,8 +60,10 @@ try {
                 Sync-NAVApp -ServerInstance BC190 -Tenant bosman -Name $AppInfo.Name -Version $AppInfo.Version 
                 Write-Host "App $($AppInfo.Name) was Synced to BC190 Tenant bosman"
 
-                foreach ($installTenant in $tenants) {    
-                    Write-Host "Installing app on tenant $_"               
+                $tenantsArray= $tenants.Split(",")
+
+                foreach ($installTenant in $tenantsArray) {    
+                    Write-Host "Installing app on tenant $installTenant"               
                     Start-NAVAppDataUpgrade -ServerInstance BC190 -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant 
                     Write-Host "Data upgrade for app $($AppInfo.Name) with version $($AppInfo.Version) was started on BC190 Tenant $installTenant"
                     #Install-NAVApp -ServerInstance BC190 -Name $AppInfo.Name -Version $AppInfo.Version -Tenant bosman        
