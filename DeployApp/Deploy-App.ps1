@@ -32,6 +32,8 @@ try {
     Import-Module "$($ServiceFolder)\Microsoft.Dynamics.Nav.Apps.Tools.dll" -Scope Global -Verbose:$false
     Import-Module "$($ServiceFolder)\NavAdminTool.ps1" -WarningAction SilentlyContinue | Out-Null
 
+    $tenantsarray= $tenants.Split(",")
+
     $apps | ForEach-Object {
         try {
             Write-Host "File Name found: $_"
@@ -46,23 +48,22 @@ try {
                 Write-Host "-App.Publisher = $($AppInfo.Publisher)"
                 Write-Host "-App.Version = $($AppInfo.Version)"
 
-                Get-NAVAppInfo -ServerInstance BC190 -Tenant bosman -Name $AppInfo.Name -Publisher $AppInfo.Publisher -TenantSpecificProperties | 
-                    ForEach-Object -Process { 
-                            Write-Host "Attempting to uninstall app $($_.Name) with version: $($_.Version)"
-                            Uninstall-NAVApp -ServerInstance BC190 -Tenant bosman -Name $_.Name -Version $_.Version -Force
-                            Write-Host "App $($_.Name) with version $($_.Version) was uninstalled from tenant bosman"
-                            Unpublish-NAVApp -ServerInstance BC190 -Name $_.Name -Version $_.Version
-                            Write-Host "App $($_.Name) with version $($_.Version) was unpublished from tenant bosman"
-                    }
+                foreach ($installTenant in $tenantsarray) {   
 
-                Publish-NAVApp -ServerInstance BC190 -Path $file -SkipVerification
-                Write-Host "App $($AppInfo.Name) was published to BC190"
-                Sync-NAVApp -ServerInstance BC190 -Tenant bosman -Name $AppInfo.Name -Version $AppInfo.Version 
-                Write-Host "App $($AppInfo.Name) was Synced to BC190 Tenant bosman"
+                    Get-NAVAppInfo -ServerInstance BC190 -Tenant $installTenant -Name $AppInfo.Name -Publisher $AppInfo.Publisher -TenantSpecificProperties | 
+                        ForEach-Object -Process { 
+                                Write-Host "Attempting to uninstall app $($_.Name) with version: $($_.Version)"
+                                Uninstall-NAVApp -ServerInstance BC190 -Tenant $installTenant -Name $_.Name -Version $_.Version -Force
+                                Write-Host "App $($_.Name) with version $($_.Version) was uninstalled from tenant $installTenant"
+                                Unpublish-NAVApp -ServerInstance BC190 -Name $_.Name -Version $_.Version
+                                Write-Host "App $($_.Name) with version $($_.Version) was unpublished from tenant $installTenant"
+                        }
 
-                $tenantsArray= $tenants.Split(",")
-
-                foreach ($installTenant in $tenantsArray) {    
+                    Publish-NAVApp -ServerInstance BC190 -Path $file -SkipVerification
+                    Write-Host "App $($AppInfo.Name) was published to BC190"
+                    Sync-NAVApp -ServerInstance BC190 -Tenant $installTenant -Name $AppInfo.Name -Version $AppInfo.Version 
+                    Write-Host "App $($AppInfo.Name) was Synced to BC190 Tenant $installTenant"
+ 
                     Write-Host "Installing app on tenant $installTenant"               
                     Start-NAVAppDataUpgrade -ServerInstance BC190 -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant 
                     Write-Host "Data upgrade for app $($AppInfo.Name) with version $($AppInfo.Version) was started on BC190 Tenant $installTenant"
@@ -72,7 +73,7 @@ try {
             }
         }
         catch {
-            Write-Host "Deploying to failed. $($_.Exception.Message)"
+            Write-Host "Deploying failed. $($_.Exception.Message)"
             exit
         }
     }
