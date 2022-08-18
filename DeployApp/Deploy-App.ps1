@@ -2,87 +2,109 @@ Param(
     [Parameter(HelpMessage = "Artifacts to deploy", Mandatory = $true)]
     [string] $artifacts,
     [Parameter(HelpMessage = "Tenants to install the app in", Mandatory = $true)]
-    [string[]] $tenants
+    [string[]] $tenants,
+    [Parameter(HelpMessage = "Environment to publish the app in", Mandatory = $true)]
+    [string[]] $environments
+
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 
-try {
-    write-Host $artifacts
+$environmentsArray = $environments.Split(",");
+
+foreach ($deployEnvironment in $environmentsArray) {
+    Write-Host "Deploying to $deployEnvironment Environment"
+    write-Host "Deploying artifacts from folder: $artifacts"
 
     $apps = @()
 
     $apps
     if (Test-Path $artifacts) {
-        Write-Host "Hello 01"
         $apps = @((Get-ChildItem -Path $artifacts) | ForEach-Object { $_.FullName })
         if (!($apps)) {
-            throw "There is no artifacts present in $artifacts."
+            throw "There are no artifacts present in $artifacts."
         }
     }
     else {
         throw "Artifact $artifacts was not found. Make sure that the artifact files exist and files are not corrupted."
     }
 
-    $ServiceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-    Import-Module "$($ServiceFolder)\Microsoft.Dynamics.Nav.Apps.Management.dll" -Scope Global -Verbose:$false
-    Import-Module "$($ServiceFolder)\Microsoft.Dynamics.Nav.Management.dll" -Scope Global -Verbose:$false
-    Import-module "$($ServiceFolder)\Microsoft.Dynamics.Nav.Model.Tools.dll" -Scope Global -Verbose:$false
-    Import-Module "$($ServiceFolder)\Microsoft.Dynamics.Nav.Apps.Tools.dll" -Scope Global -Verbose:$false
-    Import-Module "$($ServiceFolder)\NavAdminTool.ps1" -WarningAction SilentlyContinue | Out-Null
+    switch ($deployEnvironment)
+    {
+        "O" 
+        {    
+            $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
+            $serverInstance = "ONTW";
+        }
+        "T" 
+        {
+            $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
+            $serverInstance = "BC190";
+        }
+        "A" 
+        {
+            $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
+            $serverInstance = "ACCEPT";
+        }
+    }
+
+    #$serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
+    Import-Module "$($serviceFolder)\Microsoft.Dynamics.Nav.Apps.Management.dll" -Scope Global -Verbose:$false
+    Import-Module "$($serviceFolder)\Microsoft.Dynamics.Nav.Management.dll" -Scope Global -Verbose:$false
+    Import-module "$($serviceFolder)\Microsoft.Dynamics.Nav.Model.Tools.dll" -Scope Global -Verbose:$false
+    Import-Module "$($serviceFolder)\Microsoft.Dynamics.Nav.Apps.Tools.dll" -Scope Global -Verbose:$false
+    Import-Module "$($serviceFolder)\NavAdminTool.ps1" -WarningAction SilentlyContinue | Out-Null
 
     $tenantsarray= $tenants.Split(",")
 
     $apps | ForEach-Object {
-        try {
-            Write-Host "File Name found: $_"
+        Write-Host "File Name found: $_"
 
-            foreach ($file in Get-ChildItem $_)
-            {
-                Write-Host $file
+        foreach ($file in Get-ChildItem $_)
+        {
+            Write-Host "Deploying $file"
 
-                $AppInfo = Get-NAVAppInfo -Path $file -Verbose:$false
-                Write-Host "-App.ID = $($AppInfo.AppId)" 
-                Write-Host "-App.Name = $($AppInfo.Name)"
-                Write-Host "-App.Publisher = $($AppInfo.Publisher)"
-                Write-Host "-App.Version = $($AppInfo.Version)"
+            $AppInfo = Get-NAVAppInfo -Path $file -Verbose:$false
+            Write-Host "-App.ID = $($AppInfo.AppId)" 
+            Write-Host "-App.Name = $($AppInfo.Name)"
+            Write-Host "-App.Publisher = $($AppInfo.Publisher)"
+            Write-Host "-App.Version = $($AppInfo.Version)"
 
-                foreach ($installTenant in $tenantsarray) {   
+            foreach ($installTenant in $tenantsarray) {   
 
-                    Get-NAVAppInfo -ServerInstance BC190 -Tenant $installTenant -Name $AppInfo.Name -Publisher $AppInfo.Publisher -TenantSpecificProperties | 
-                        ForEach-Object -Process { 
-                                Write-Host "Attempting to uninstall app $($_.Name) with version: $($_.Version)"
-                                Uninstall-NAVApp -ServerInstance BC190 -Tenant $installTenant -Name $_.Name -Version $_.Version -Force
-                                Write-Host "App $($_.Name) with version $($_.Version) was uninstalled from tenant $installTenant"
-                                Unpublish-NAVApp -ServerInstance BC190 -Name $_.Name -Version $_.Version
-                                Write-Host "App $($_.Name) with version $($_.Version) was unpublished from tenant $installTenant"
-                        }
-
-                    Publish-NAVApp -ServerInstance BC190 -Path $file -SkipVerification
-                    Write-Host "App $($AppInfo.Name) was published to BC190"
-                    Sync-NAVApp -ServerInstance BC190 -Tenant $installTenant -Name $AppInfo.Name -Version $AppInfo.Version 
-                    Write-Host "App $($AppInfo.Name) was Synced to BC190 Tenant $installTenant"
- 
-                    Write-Host "Installing app on tenant $installTenant"   
-                    try {
-                        Start-NAVAppDataUpgrade -ServerInstance BC190 -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant         
-                        Write-Host "Data upgrade for app $($AppInfo.Name) with version $($AppInfo.Version) was started on BC190 Tenant $installTenant"                      
+                Get-NAVAppInfo -ServerInstance $serverInstance -Tenant $installTenant -Name $AppInfo.Name -Publisher $AppInfo.Publisher -TenantSpecificProperties | 
+                    ForEach-Object -Process { 
+                            Write-Host "Attempting to uninstall app $($_.Name) with version: $($_.Version)"
+                            Uninstall-NAVApp -ServerInstance $serverInstance -Tenant $installTenant -Name $_.Name -Version $_.Version -Force
+                            Write-Host "App $($_.Name) with version $($_.Version) was uninstalled from tenant $installTenant"
                     }
-                    catch {
-                        Write-Host $_.Exception.Message
-                    }      
-                    Install-NAVApp -ServerInstance BC190 -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant        
-                    Write-Host "App $($AppInfo.Name) with version $($AppInfo.Version) was installed on BC190 Tenant $installTenant"
+
+                Publish-NAVApp -ServerInstance $serverInstance -Path $file -SkipVerification
+                Write-Host "App $($AppInfo.Name) was published to $serverInstance"
+                Sync-NAVApp -ServerInstance $serverInstance -Tenant $installTenant -Name $AppInfo.Name -Version $AppInfo.Version 
+                Write-Host "App $($AppInfo.Name) was Synced to $serverInstance Tenant $installTenant"
+
+                Write-Host "Installing app on tenant $installTenant"   
+                try {
+                    Start-NAVAppDataUpgrade -ServerInstance $serverInstance -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant         
+                    Write-Host "Data upgrade for app $($AppInfo.Name) with version $($AppInfo.Version) was started on $serverInstance Tenant $installTenant"                      
                 }
+                catch {
+                    Write-Host "Data Upgrade failed for app $($AppInfo.Name) with version $($AppInfo.Version): $($_.Exception.Message)"
+                }      
+                Install-NAVApp -ServerInstance $serverInstance -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant        
+                Write-Host "App $($AppInfo.Name) with version $($AppInfo.Version) was installed on $serverInstance Tenant $installTenant"
+            }
+            
+            try
+            {
+                Unpublish-NAVApp -ServerInstance $serverInstance -Name $_.Name -Version $_.Version
+                Write-Host "App $($_.Name) with version $($_.Version) was unpublished from $serverInstance"
+            }
+            catch {
+                Write-Host "Unpublish of app $($_.Name) with version $($_.Version) failed: $($_.Exception.Message)"
             }
         }
-        catch {
-            Write-Host "Deploying failed. $($_.Exception.Message)"
-            exit
-        }
     }
-}
-catch {
-    Write-Host $_.Exception.Message
 }
