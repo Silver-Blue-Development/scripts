@@ -1,5 +1,4 @@
 name: PowerShell script
-author: Freddy Kristiansen
 inputs:
   actor:
     description: The GitHub actor running the action
@@ -32,7 +31,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/Run-Pipeline.ps1 -actor '${{ inputs.actor }}' -token '${{ inputs.token }}' -parentTelemetryScopeJson '${{ inputs.parentTelemetryScopeJson }}' -project '${{ inputs.project }}' -settingsJson '${{ inputs.settingsJson }}' -secretsJson '${{ inputs.secretsJson }}' -gitHubPAT '${{ inputs.GitHubPAT }}'
+    - run: ${{ github.action_path }}/Build-App.ps1 -actor '${{ inputs.actor }}' -token '${{ inputs.token }}' -parentTelemetryScopeJson '${{ inputs.parentTelemetryScopeJson }}' -project '${{ inputs.project }}' -settingsJson '${{ inputs.settingsJson }}' -secretsJson '${{ inputs.secretsJson }}' -gitHubPAT '${{ inputs.GitHubPAT }}'
       shell: PowerShell
 branding:
   icon: terminal
