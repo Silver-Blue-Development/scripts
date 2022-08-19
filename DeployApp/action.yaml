@@ -19,7 +19,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/Deploy-App.ps1 -tenants '${{ inputs.tenants }}' -environments '${{ inputs.environments }}' -azureSAS '$({ inputs.azureSAS})' -tenantName '$({ inputs.tenantName})'
+    - run: ${{ github.action_path }}/Deploy-App.ps1 -tenants '${{ inputs.tenants }}' -environments '${{ inputs.environments }}' -azureSAS '$({ inputs.azureSAS})' -repoName '$({ inputs.repoName})'
       id: deployapp
       shell: PowerShell
 branding:
