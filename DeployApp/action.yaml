@@ -1,9 +1,5 @@
 name: PowerShell script
 inputs:
-  artifacts:
-    description: Specifies the path to the apps
-    required: true
-    default: ''
   tenants:
     descripton: Specifies in which tenant(s) the app should be installed
     required: true
@@ -12,10 +8,18 @@ inputs:
     description: Specifies in which environment(s) the app should be deployed (O/T/A)
     required: true
     default: ''    
+  azureSAS:
+    description: Specifies the Azure SAS Token
+    required: true
+    default: ''   
+  repoName:
+    description: Specifies the repository name
+    required: true
+    default: ''  
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/Deploy-App.ps1 -artifacts '${{ inputs.artifacts }}' -tenants '${{ inputs.tenants }}' -environments '${{ inputs.environments }}' 
+    - run: ${{ github.action_path }}/Deploy-App.ps1 -tenants '${{ inputs.tenants }}' -environments '${{ inputs.environments }}' -azureSAS '$({ inputs.azureSAS})' -tenantName '$({ inputs.tenantName})'
       id: deployapp
       shell: PowerShell
 branding:
