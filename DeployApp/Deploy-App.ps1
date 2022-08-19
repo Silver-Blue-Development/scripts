@@ -23,19 +23,19 @@ foreach ($deployEnvironment in $environmentsArray) {
         "O" 
         {    
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "ONTW";
+            $serverInstance = "ONTW"; #TODO Set correct instance
             $containerName = "Development";
         }
         "T" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "BC190";
+            $serverInstance = "BC190"; #TODO Set correct instance
             $containerName = "Development";
         }
         "A" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "ACCEPT";
+            $serverInstance = "BC190"; #TODO Set correct instance
             $containerName = "Acceptance";
         }
     }      
