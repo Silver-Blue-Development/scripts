@@ -41,6 +41,9 @@ foreach ($deployEnvironment in $environmentsArray) {
         }
     }      
 
+    Write-Host "Deploying to Instance: $serverInstance"
+    Write-Host "Retrieving app files from Azure Container $containerName"
+
     $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/$containerName/Apps/*?$azureSas"
     $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSas" 
 
