@@ -21,7 +21,6 @@ runs:
   steps:
     - run: ${{ github.action_path }}/Deploy-App.ps1 -tenants '${{ inputs.tenants }}' -environments '${{ inputs.environments }}' -repoName '${{ inputs.repoName}}' -azureContainerSAS '${{ inputs.azureContainerSAS}}'
       id: deployapp
-      id: deployapp
       shell: PowerShell
 branding:
   icon: terminal
