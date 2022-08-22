@@ -5,7 +5,7 @@ Param(
     [ValidateSet('O','T','A')]
     [string[]] $environments,
     [Parameter(HelpMessage = "SAS Token for Azure", Mandatory = $true)]
-    [string] $azureSas,
+    [string] $azureSAS,
     [Parameter(HelpMessage = "Repository Name", Mandatory = $true)]
     [string] $repoName
 )
@@ -44,8 +44,8 @@ foreach ($deployEnvironment in $environmentsArray) {
     Write-Host "Deploying to Instance: $serverInstance"
     Write-Host "Retrieving app files from Azure Container $containerName"
 
-    $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/$containerName/Apps/*?$azureSas"
-    $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSas" 
+    $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/$containerName/Apps/*?$azureSAS"
+    $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSAS" 
 
     $FolderName = "C:\Artifacts\$containerName\$repoName"
     if (Test-Path $FolderName) {            
