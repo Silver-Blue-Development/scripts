@@ -4,10 +4,10 @@ Param(
     [Parameter(HelpMessage = "Environment to publish the app in", Mandatory = $true)]
     [ValidateSet('O','T','A')]
     [string[]] $environments,
-    [Parameter(HelpMessage = "SAS Token for Azure", Mandatory = $true)]
-    [string] $azureSAS,
     [Parameter(HelpMessage = "Repository Name", Mandatory = $true)]
-    [string] $repoName
+    [string] $repoName,
+    [Parameter(HelpMessage = "SAS Token for Azure", Mandatory = $true)]
+    [string] $azureSAS
 )
 
 $ErrorActionPreference = "Stop"
@@ -24,42 +24,45 @@ foreach ($deployEnvironment in $environmentsArray) {
         "O" 
         {    
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "ONTW"; #TODO Set correct instance
-            $containerName = "Development";
+            $serverInstance = "ONTW" #TODO Set correct instance
+            $containerName = "Development"
+            $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/development/Apps/*?$azureSAS"
+            $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/development/TestApps/*?$azureSAS"     
         }
         "T" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "BC190"; #TODO Set correct instance
-            $containerName = "Development";
+            $serverInstance = "BC190" #TODO Set correct instance
+            $containerName = "Development"
+            $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/development/Apps/*?$azureSAS"
+            $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/development/TestApps/*?$azureSAS"  
         }
         "A" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "BC190"; #TODO Set correct instance
-            $containerName = "Acceptance";
+            $serverInstance = "BC190" #TODO Set correct instance
+            $containerName = "Acceptance"
+            $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/acceptance/Apps/*?$azureSAS"
+            $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/acceptance/TestApps/*?$azureSAS"  
         }
     }      
 
     Write-Host "Deploying to Instance: $serverInstance"
     Write-Host "Retrieving app files from Azure Container $containerName"
     Write-Host "Repository Name = $repoName"
-    if ($azureSAS == '')
-    {
-        Write-Host "Azure SAS token has no value"
-    }
+    Write-Host "Azure SAS length = $($azureSAS.Length)"
 
-    $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/$containerName/Apps/*?$azureSAS"
-    $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSAS"     
+    #$SourcePath = "https://businesscentralartifcats.blob.core.windows.net/$containerName/Apps/*?$azureSAS"
+    #$SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSAS"     
 
-    $FolderName = "C:\Artifacts\$containerName\$repoName"
-    if (Test-Path $FolderName) {            
+    $artifacts = "C:\Artifacts\$containerName\$repoName"
+    if (Test-Path $artifacts) {            
         Write-Host "Removing previous app versions from folder on server"
         Remove-Item C:\Artifacts\$containerName\$repoName\*.* 
     } 
 
-    $FolderName = "C:\Artifacts\$containerName\$repoName\Tests"
-    if (Test-Path $FolderName) {
+    $artifactsTest = "C:\Artifacts\$containerName\$repoName\Tests"
+    if (Test-Path $artifactsTest) {
         Write-Host "Removing previous test versions from folder on server"
         Remove-Item C:\Artifacts\$containerName\$repoName\Tests\*.* 
     }
@@ -67,8 +70,8 @@ foreach ($deployEnvironment in $environmentsArray) {
     $FolderName = "C:\Azure\azcopy.exe"
     if (Test-Path $FolderName -PathType Leaf) {     
         Set-Location "C:\Azure"
-        ./azcopy.exe copy $SourcePath --include-pattern "*$repoName*" "C:\Artifacts\$containerName\$repoName"          
-        ./azcopy.exe copy $SourcePath2 --include-pattern "*$repoName*" "C:\Artifacts\$containerName\$repoName\Tests"
+        ./azcopy.exe copy $SourcePath --include-pattern "*$repoName*" $artifacts         
+        ./azcopy.exe copy $SourcePath2 --include-pattern "*$repoName*" $artifactsTest
     }
     else
     {            
@@ -77,7 +80,7 @@ foreach ($deployEnvironment in $environmentsArray) {
         Write-Host "File azcopy.exe is missing in Azure folder"
     } 
     
-    $artifacts = "C:\Artifacts\$containerName\$repoName"
+    #$artifacts = "C:\Artifacts\$containerName\$repoName"
     write-Host "Deploying artifacts from folder: $artifacts"
 
     $apps = @()
