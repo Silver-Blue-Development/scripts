@@ -2,11 +2,15 @@ Param(
     [Parameter(HelpMessage = "Tenants to install the app in", Mandatory = $true)]
     [string[]] $tenants,
     [Parameter(HelpMessage = "Environment to publish the app in", Mandatory = $true)]
+    [ValidateSet('O','T','A')]
     [string[]] $environments,
     [Parameter(HelpMessage = "SAS Token for Azure", Mandatory = $true)]
     [string] $azureSas,
     [Parameter(HelpMessage = "Repository Name", Mandatory = $true)]
-    [string] $repoName
+    [string] $repoName,
+    [Parameter(HelpMessage = "O or A", Mandatory = $false)]
+    [ValidateSet('O','A')]
+    [string] $source = 'O'
 )
 
 $ErrorActionPreference = "Stop"
@@ -24,18 +28,27 @@ foreach ($deployEnvironment in $environmentsArray) {
         {    
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "ONTW"; #TODO Set correct instance
-            $containerName = "Development";
         }
         "T" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "BC190"; #TODO Set correct instance
-            $containerName = "Development";
         }
         "A" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "ACCEPT"; #TODO Set correct instance
+        }
+    }      
+
+    switch ($source)
+    {
+        "O" 
+        {    
+            $containerName = "Development";
+        }
+        "A" 
+        {
             $containerName = "Acceptance";
         }
     }      
