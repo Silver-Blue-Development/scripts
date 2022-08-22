@@ -5,7 +5,9 @@ Param(
     [ValidateSet('O','T','A')]
     [string[]] $environments,
     [Parameter(HelpMessage = "The Artifcats folder", Mandatory = $true)]
-    [string] $repoName
+    [string] $repoName,
+    [Parameter(HelpMessage = "The Azure Container SAS", Mandatory = $true)]
+    [string] $azureContainerSAS
 )
 
 $ErrorActionPreference = "Stop"

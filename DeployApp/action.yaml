@@ -11,11 +11,16 @@ inputs:
   repoName:
     description: Specifies the repoName
     required: true
-    default: ''    
+    default: ''  
+  azureContainerSAS:
+    description: Specifies the Azure Container SAS
+    required: true
+    default: ''  
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/Deploy-App.ps1 -tenants '${{ inputs.tenants }}' -environments '${{ inputs.environments }}' -repoName '${{ inputs.repoName}}'
+    - run: ${{ github.action_path }}/Deploy-App.ps1 -tenants '${{ inputs.tenants }}' -environments '${{ inputs.environments }}' -repoName '${{ inputs.repoName}}' -azureContainerSAS '${{ inputs.azureContainerSAS}}'
+      id: deployapp
       id: deployapp
       shell: PowerShell
 branding:
