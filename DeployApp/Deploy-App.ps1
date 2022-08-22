@@ -35,13 +35,13 @@ foreach ($deployEnvironment in $environmentsArray) {
         "A" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "BC190"; #TODO Set correct instance
+            $serverInstance = "ACCEPT"; #TODO Set correct instance
             $containerName = "Acceptance";
         }
     }      
     
     $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/$containerName/Apps/*?$azureSas"
-    $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$repoName/TestApps/*?$azureSas" 
+    $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSas" 
 
     $FolderName = "C:\Artifacts\$containerName\$repoName"
     if (Test-Path $FolderName) {            
@@ -49,10 +49,10 @@ foreach ($deployEnvironment in $environmentsArray) {
         Remove-Item C:\Artifacts\$containerName\$repoName\*.* 
     } 
 
-    $FolderName = "C:\Artifacts\$repoName\$repoName\Tests"
+    $FolderName = "C:\Artifacts\$containerName\$repoName\Tests"
     if (Test-Path $FolderName) {
         Write-Host "Removing previous test versions from folder on server"
-        Remove-Item C:\Artifacts\$repoName\$repoName\Tests\*.* 
+        Remove-Item C:\Artifacts\$containerName\$repoName\Tests\*.* 
     }
 
     $FolderName = "C:\Azure\azcopy.exe"
