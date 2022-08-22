@@ -43,9 +43,14 @@ foreach ($deployEnvironment in $environmentsArray) {
 
     Write-Host "Deploying to Instance: $serverInstance"
     Write-Host "Retrieving app files from Azure Container $containerName"
+    Write-Host "Repository Name = $repoName"
+    if ($azureSAS == '')
+    {
+        Write-Host "Azure SAS token has no value"
+    }
 
     $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/$containerName/Apps/*?$azureSAS"
-    $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSAS" 
+    $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSAS"     
 
     $FolderName = "C:\Artifacts\$containerName\$repoName"
     if (Test-Path $FolderName) {            
@@ -62,8 +67,8 @@ foreach ($deployEnvironment in $environmentsArray) {
     $FolderName = "C:\Azure\azcopy.exe"
     if (Test-Path $FolderName -PathType Leaf) {     
         Set-Location "C:\Azure"
-        ./azcopy.exe copy $SourcePath --include-pattern "*$repoName*" 'C:\Artifacts\$repoName\$repoName'          
-        ./azcopy.exe copy $SourcePath2 --include-pattern "*$repoName*" 'C:\Artifacts\$repoName\$repoName\Tests'
+        ./azcopy.exe copy $SourcePath --include-pattern "*$repoName*" "C:\Artifacts\$containerName\$repoName"          
+        ./azcopy.exe copy $SourcePath2 --include-pattern "*$repoName*" "C:\Artifacts\$containerName\$repoName\Tests"
     }
     else
     {            
