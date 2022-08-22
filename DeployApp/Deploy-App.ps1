@@ -5,7 +5,7 @@ Param(
     [ValidateSet('O','T','A')]
     [string[]] $environments,
     [Parameter(HelpMessage = "The Artifcats folder", Mandatory = $true)]
-    [string] $artifactsFolder
+    [string] $repoName
 )
 
 $ErrorActionPreference = "Stop"
@@ -23,24 +23,24 @@ foreach ($deployEnvironment in $environmentsArray) {
         {    
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "ONTW" #TODO Set correct instance  
-            $artifacts = "C:\Artifacts\Development\$artifactsFolder"
+            $artifacts = "C:\Artifacts\Development\$repoName"
         }
         "T" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "BC190" #TODO Set correct instance
-            $artifacts = "C:\Artifacts\Development\$artifactsFolder"
+            $artifacts = "C:\Artifacts\Development\$repoName"
         }
         "A" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "BC190" #TODO Set correct instance 
-            $artifacts = "C:\Artifacts\Acceptance\$artifactsFolder"
+            $artifacts = "C:\Artifacts\Acceptance\$repoName"
         }
     }      
 
     Write-Host "Deploying to Instance: $serverInstance"    
-    write-Host "Deploying artifacts from folder: $artifacts"
+    write-Host "Deploying artifacts from folder: $artifacts"    
 
     $apps = @()
 
