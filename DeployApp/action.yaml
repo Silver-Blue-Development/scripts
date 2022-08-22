@@ -8,18 +8,14 @@ inputs:
     description: Specifies in which environment(s) the app should be deployed (O/T/A)
     required: true
     default: ''    
-  azureSAS:
+  artifactsFolder:
     description: Specifies the Azure SAS Token
     required: true
-    default: ''   
-  repoName:
-    description: Specifies the repository name
-    required: true
-    default: ''   
+    default: ''    
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/Deploy-App.ps1 -tenants '${{ inputs.tenants }}' -environments '${{ inputs.environments }}' -azureSAS '$({ inputs.azureSAS})' -repoName '$({ inputs.repoName})'
+    - run: ${{ github.action_path }}/Deploy-App.ps1 -tenants '${{ inputs.tenants }}' -environments '${{ inputs.environments }}' -azureSAS '$({ inputs.artifactsFolder})'
       id: deployapp
       shell: PowerShell
 branding:

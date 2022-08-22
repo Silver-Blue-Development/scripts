@@ -4,10 +4,8 @@ Param(
     [Parameter(HelpMessage = "Environment to publish the app in", Mandatory = $true)]
     [ValidateSet('O','T','A')]
     [string[]] $environments,
-    [Parameter(HelpMessage = "Repository Name", Mandatory = $true)]
-    [string] $repoName,
-    [Parameter(HelpMessage = "SAS Token for Azure", Mandatory = $true)]
-    [string] $azureSAS
+    [Parameter(HelpMessage = "The Artifcats folder", Mandatory = $true)]
+    [string] $artifactsFolder
 )
 
 $ErrorActionPreference = "Stop"
@@ -24,63 +22,21 @@ foreach ($deployEnvironment in $environmentsArray) {
         "O" 
         {    
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "ONTW" #TODO Set correct instance
-            $containerName = "Development"
-            $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/development/Apps/*?$azureSAS"
-            $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/development/TestApps/*?$azureSAS"     
+            $serverInstance = "ONTW" #TODO Set correct instance  
         }
         "T" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "BC190" #TODO Set correct instance
-            $containerName = "Development"
-            $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/development/Apps/*?$azureSAS"
-            $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/development/TestApps/*?$azureSAS"  
         }
         "A" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "BC190" #TODO Set correct instance
-            $containerName = "Acceptance"
-            $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/acceptance/Apps/*?$azureSAS"
-            $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/acceptance/TestApps/*?$azureSAS"  
+            $serverInstance = "BC190" #TODO Set correct instance 
         }
     }      
 
-    Write-Host "Deploying to Instance: $serverInstance"
-    Write-Host "Retrieving app files from Azure Container $containerName"
-    Write-Host "Repository Name = $repoName"
-    Write-Host "Azure SAS length = $($azureSAS.Length)"
-
-    #$SourcePath = "https://businesscentralartifcats.blob.core.windows.net/$containerName/Apps/*?$azureSAS"
-    #$SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSAS"     
-
-    $artifacts = "C:\Artifacts\$containerName\$repoName"
-    if (Test-Path $artifacts) {            
-        Write-Host "Removing previous app versions from folder on server"
-        Remove-Item C:\Artifacts\$containerName\$repoName\*.* 
-    } 
-
-    $artifactsTest = "C:\Artifacts\$containerName\$repoName\Tests"
-    if (Test-Path $artifactsTest) {
-        Write-Host "Removing previous test versions from folder on server"
-        Remove-Item C:\Artifacts\$containerName\$repoName\Tests\*.* 
-    }
-
-    $FolderName = "C:\Azure\azcopy.exe"
-    if (Test-Path $FolderName -PathType Leaf) {     
-        Set-Location "C:\Azure"
-        ./azcopy.exe copy $SourcePath --include-pattern "*$repoName*" $artifacts         
-        ./azcopy.exe copy $SourcePath2 --include-pattern "*$repoName*" $artifactsTest
-    }
-    else
-    {            
-        New-Item $FolderName -ItemType Directory
-        Write-Host "Folder Created successfully"            
-        Write-Host "File azcopy.exe is missing in Azure folder"
-    } 
-    
-    #$artifacts = "C:\Artifacts\$containerName\$repoName"
+    Write-Host "Deploying to Instance: $serverInstance"    
     write-Host "Deploying artifacts from folder: $artifacts"
 
     $apps = @()
