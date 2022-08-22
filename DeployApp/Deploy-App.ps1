@@ -7,10 +7,7 @@ Param(
     [Parameter(HelpMessage = "SAS Token for Azure", Mandatory = $true)]
     [string] $azureSas,
     [Parameter(HelpMessage = "Repository Name", Mandatory = $true)]
-    [string] $repoName,
-    [Parameter(HelpMessage = "O or A", Mandatory = $false)]
-    [ValidateSet('O','A')]
-    [string] $source = 'O'
+    [string] $repoName
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,31 +25,22 @@ foreach ($deployEnvironment in $environmentsArray) {
         {    
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "ONTW"; #TODO Set correct instance
+            $containerName = "Development";
         }
         "T" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "BC190"; #TODO Set correct instance
+            $containerName = "Development";
         }
         "A" 
         {
             $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
             $serverInstance = "ACCEPT"; #TODO Set correct instance
-        }
-    }      
-
-    switch ($source)
-    {
-        "O" 
-        {    
-            $containerName = "Development";
-        }
-        "A" 
-        {
             $containerName = "Acceptance";
         }
     }      
-    
+
     $SourcePath = "https://businesscentralartifcats.blob.core.windows.net/$containerName/Apps/*?$azureSas"
     $SourcePath2 = "https://businesscentralartifcats.blob.core.windows.net/$containerName/TestApps/*?$azureSas" 
 

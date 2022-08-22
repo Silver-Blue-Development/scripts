@@ -16,10 +16,6 @@ inputs:
     description: Specifies the repository name
     required: true
     default: ''   
-  source:
-    description: Specifies if the build was created in the Acceptance or Development process (A or O)
-    required: false
-    default: 'T'  
 runs:
   using: composite
   steps:
