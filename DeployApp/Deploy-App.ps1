@@ -82,9 +82,12 @@ foreach ($deployEnvironment in $environmentsArray) {
 
                     Get-NAVAppInfo -ServerInstance $serverInstance -Tenant $installTenant -Name $AppInfo.Name -Publisher $AppInfo.Publisher -TenantSpecificProperties | 
                         ForEach-Object -Process { 
+                            if ($_.Version -ne $AppInfo.Version)
+                            {
                                 Write-Host "Attempting to uninstall app $($_.Name) with version: $($_.Version)"
                                 Uninstall-NAVApp -ServerInstance $serverInstance -Tenant $installTenant -Name $_.Name -Version $_.Version -Force
                                 Write-Host "App $($_.Name) with version $($_.Version) was uninstalled from tenant $installTenant"
+                            }
                         }
 
                     Publish-NAVApp -ServerInstance $serverInstance -Path $file -SkipVerification
@@ -100,7 +103,7 @@ foreach ($deployEnvironment in $environmentsArray) {
                     catch {
                         Write-Host "Data Upgrade failed for app $($AppInfo.Name) with version $($AppInfo.Version): $($_.Exception.Message)"
                     }      
-                    Install-NAVApp -ServerInstance $serverInstance -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant        
+                    #Install-NAVApp -ServerInstance $serverInstance -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant        
                     Write-Host "App $($AppInfo.Name) with version $($AppInfo.Version) was installed on $serverInstance Tenant $installTenant"
                 }
                 
