@@ -45,6 +45,7 @@ foreach ($deployEnvironment in $environmentsArray) {
     write-Host "Deploying artifacts from folder: $artifacts"    
 
     $apps = @()
+    $testApps = @()
 
     $apps
     if (Test-Path $artifacts) {
