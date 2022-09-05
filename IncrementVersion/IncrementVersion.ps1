@@ -10,7 +10,7 @@ Param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 $bcContainerHelperPath = $null
-$directCommit = "Y"
+$directCommit = "N"
 
 try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
@@ -23,6 +23,7 @@ try {
     $addToVersionNumber = "$versionnumber".StartsWith('+')
     if ($addToVersionNumber) {
         $versionnumber = $versionnumber.Substring(1)
+        Write-Host "Version number is set to: $($versionnumber)"
     }
     try {
         $newVersion = [System.Version]"$($versionnumber).0.0"
