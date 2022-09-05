@@ -20,6 +20,8 @@ try {
         }
         $folders | ForEach-Object {
             Write-Host "Modifying app.json in folder $project\$_"
+            Write-Host "Project $($project)"
+            Write-Host "Folder $($_)"
             $appJsonFile = Join-Path "$project\$_" "app.json"
             if (Test-Path $appJsonFile) {
                 try {
