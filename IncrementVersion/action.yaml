@@ -1,0 +1,24 @@
+name: PowerShell script
+permissions:
+  contents: write
+  pull-requests: write
+inputs:
+  actor:
+    description: The GitHub actor running the action
+    required: false
+    default: ${{ github.actor }}
+  token:
+    description: The GitHub token running the action
+    required: false
+    default: ${{ github.token }}
+  versionnumber:
+    description: Updated Version Number. Use Major.Minor for absolute change, use +Major.Minor for incremental change.
+    required: true
+runs:
+  using: composite
+  steps:
+    - run: try { ${{ github.action_path }}/IncrementVersion.ps1 -actor '${{ inputs.actor }}' -token '${{ inputs.token }}' -versionnumber '${{ inputs.versionnumber }}' } catch { Write-Host "::Error::Unexpected error when running action ($($_.Exception.Message.Replace("`r",'').Replace("`n",' ')))"; exit 1 }
+      shell: PowerShell
+branding:
+  icon: terminal
+  color: blue
