@@ -56,7 +56,8 @@ try {
     Write-Host = "App Build = $($appBuild)"
     Write-Host = "App Revision = $($appRevision)"
 
-    $appRevision = $settings.appRevision
+    # $appRevision = $settings.appRevision
+
     'licenseFileUrl'| ForEach-Object {
         if ($secrets.ContainsKey($_)) {
             $value = $secrets."$_"
