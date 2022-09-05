@@ -7,11 +7,14 @@ try {
 
     $project = ""
     
-    $baseFolder = Join-Path $ENV:GITHUB_WORKSPACE $project
-    $settings = ReadSettings -baseFolder $baseFolder -workflowName $env:GITHUB_WORKFLOW
+    # $baseFolder = Join-Path $ENV:GITHUB_WORKSPACE $project
+    # $settings = ReadSettings -baseFolder $baseFolder -workflowName $env:GITHUB_WORKFLOW
 
-    Write-Host "Settings: $($settings)"
-    $settingsJson = Get-Content $settings -Encoding UTF8 | ConvertFrom-Json
+    # Write-Host "Settings: $($settings)"
+    # $settingsJson = Get-Content $settings -Encoding UTF8 | ConvertFrom-Json
+
+    Write-Host "Reading settings from $project\$ALGoSettingsFile"
+    $settingsJson = Get-Content "$project\$ALGoSettingsFile" -Encoding UTF8 | ConvertFrom-Json
 
     $folders = @('appFolders', 'testFolders' | ForEach-Object { if ($SettingsJson.PSObject.Properties.Name -eq $_) { $settingsJson."$_" } })
     if (-not ($folders)) {
