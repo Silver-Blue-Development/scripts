@@ -753,6 +753,42 @@ function CommitFromNewFolder {
     }
 }
 
+
+function CloneIntoNewFolder {
+    Param(
+        [string] $actor,
+        [string] $token,
+        [string] $branch
+    )
+
+    $baseFolder = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
+    New-Item $baseFolder -ItemType Directory | Out-Null
+    Set-Location $baseFolder
+    $serverUri = [Uri]::new($env:GITHUB_SERVER_URL)
+    $serverUrl = "$($serverUri.Scheme)://$($actor):$($token)@$($serverUri.Host)/$($env:GITHUB_REPOSITORY)"
+
+    # Environment variables for hub commands
+    $env:GITHUB_USER = $actor
+    $env:GITHUB_TOKEN = $token
+
+    # Configure git username and email
+    invoke-git config --global user.email "$actor@users.noreply.github.com"
+    invoke-git config --global user.name "$actor"
+
+    # Configure hub to use https
+    invoke-git config --global hub.protocol https
+
+    invoke-git clone $serverUrl
+
+    Set-Location *
+
+    if ($branch) {
+        invoke-git checkout -b $branch
+    }
+
+    $serverUrl
+}
+
 # function installModules {
 #     Param(
 #         [String[]] $modules
