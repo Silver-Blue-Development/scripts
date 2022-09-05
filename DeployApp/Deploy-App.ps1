@@ -93,56 +93,56 @@ foreach ($deployEnvironment in $environmentsArray) {
             Write-Host $_.Exception.Message
         }     
     }
+}
 
-    function PublishAndInstallApp {
-        param (
-            $theApp
-        )    
-        foreach ($file in Get-ChildItem $_)
-        {
-            Write-Host "Deploying $file"
+function PublishAndInstallApp {
+    param (
+        $theApp
+    )    
+    foreach ($file in Get-ChildItem $_)
+    {
+        Write-Host "Deploying $file"
 
-            $AppInfo = Get-NAVAppInfo -Path $file -Verbose:$false
-            Write-Host "-App.ID = $($AppInfo.AppId)" 
-            Write-Host "-App.Name = $($AppInfo.Name)"
-            Write-Host "-App.Publisher = $($AppInfo.Publisher)"
-            Write-Host "-App.Version = $($AppInfo.Version)"
+        $AppInfo = Get-NAVAppInfo -Path $file -Verbose:$false
+        Write-Host "-App.ID = $($AppInfo.AppId)" 
+        Write-Host "-App.Name = $($AppInfo.Name)"
+        Write-Host "-App.Publisher = $($AppInfo.Publisher)"
+        Write-Host "-App.Version = $($AppInfo.Version)"
 
-            foreach ($installTenant in $tenantsarray) {   
+        foreach ($installTenant in $tenantsarray) {   
 
-                Get-NAVAppInfo -ServerInstance $serverInstance -Tenant $installTenant -Name $AppInfo.Name -Publisher $AppInfo.Publisher -TenantSpecificProperties | 
-                    ForEach-Object -Process { 
-                        if ($_.Version -ne $AppInfo.Version)
-                        {
-                            Write-Host "Attempting to uninstall app $($_.Name) with version: $($_.Version)"
-                            Uninstall-NAVApp -ServerInstance $serverInstance -Tenant $installTenant -Name $_.Name -Version $_.Version -Force
-                            Write-Host "App $($_.Name) with version $($_.Version) was uninstalled from tenant $installTenant"
-                        }
+            Get-NAVAppInfo -ServerInstance $serverInstance -Tenant $installTenant -Name $AppInfo.Name -Publisher $AppInfo.Publisher -TenantSpecificProperties | 
+                ForEach-Object -Process { 
+                    if ($_.Version -ne $AppInfo.Version)
+                    {
+                        Write-Host "Attempting to uninstall app $($_.Name) with version: $($_.Version)"
+                        Uninstall-NAVApp -ServerInstance $serverInstance -Tenant $installTenant -Name $_.Name -Version $_.Version -Force
+                        Write-Host "App $($_.Name) with version $($_.Version) was uninstalled from tenant $installTenant"
                     }
-
-                Publish-NAVApp -ServerInstance $serverInstance -Path $file -SkipVerification
-                Write-Host "App $($AppInfo.Name) was published to $serverInstance"
-                Sync-NAVApp -ServerInstance $serverInstance -Tenant $installTenant -Name $AppInfo.Name -Version $AppInfo.Version 
-                Write-Host "App $($AppInfo.Name) was Synced to $serverInstance Tenant $installTenant"
-
-                Write-Host "Installing app on tenant $installTenant"   
-                try {
-                    Start-NAVAppDataUpgrade -ServerInstance $serverInstance -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant         
-                    Write-Host "Data upgrade for app $($AppInfo.Name) with version $($AppInfo.Version) was started on $serverInstance Tenant $installTenant"                      
                 }
-                catch {
-                    Write-Host "Data Upgrade failed for app $($AppInfo.Name) with version $($AppInfo.Version): $($_.Exception.Message)"
-                }      
-                Write-Host "App $($AppInfo.Name) with version $($AppInfo.Version) was installed on $serverInstance Tenant $installTenant"
-            }
-            
+
+            Publish-NAVApp -ServerInstance $serverInstance -Path $file -SkipVerification
+            Write-Host "App $($AppInfo.Name) was published to $serverInstance"
+            Sync-NAVApp -ServerInstance $serverInstance -Tenant $installTenant -Name $AppInfo.Name -Version $AppInfo.Version 
+            Write-Host "App $($AppInfo.Name) was Synced to $serverInstance Tenant $installTenant"
+
+            Write-Host "Installing app on tenant $installTenant"   
             try {
-                Unpublish-NAVApp -ServerInstance $serverInstance -Name $_.Name -Version $_.Version
-                Write-Host "App $($_.Name) with version $($_.Version) was unpublished from $serverInstance"
+                Start-NAVAppDataUpgrade -ServerInstance $serverInstance -Name $AppInfo.Name -Version $AppInfo.Version -Tenant $installTenant         
+                Write-Host "Data upgrade for app $($AppInfo.Name) with version $($AppInfo.Version) was started on $serverInstance Tenant $installTenant"                      
             }
             catch {
-                Write-Host "Unpublish of app $($_.Name) with version $($_.Version) failed: $($_.Exception.Message)"
-            } 
+                Write-Host "Data Upgrade failed for app $($AppInfo.Name) with version $($AppInfo.Version): $($_.Exception.Message)"
+            }      
+            Write-Host "App $($AppInfo.Name) with version $($AppInfo.Version) was installed on $serverInstance Tenant $installTenant"
         }
+        
+        try {
+            Unpublish-NAVApp -ServerInstance $serverInstance -Name $_.Name -Version $_.Version
+            Write-Host "App $($_.Name) with version $($_.Version) was unpublished from $serverInstance"
+        }
+        catch {
+            Write-Host "Unpublish of app $($_.Name) with version $($_.Version) failed: $($_.Exception.Message)"
+        } 
     }
 }
