@@ -6,6 +6,9 @@ try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\Github-Helper.ps1" -Resolve)
 
     $project = ""
+    
+    Write-Host "Reading settings from $project\$ALGoSettingsFile"
+    $settingsJson = Get-Content "$project\$ALGoSettingsFile" -Encoding UTF8 | ConvertFrom-Json
 
     $folders = @('appFolders', 'testFolders' | ForEach-Object { if ($SettingsJson.PSObject.Properties.Name -eq $_) { $settingsJson."$_" } })
     if (-not ($folders)) {
