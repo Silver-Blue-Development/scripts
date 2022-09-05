@@ -14,7 +14,6 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 
 $environmentsArray = $environments.Split(",");
-$tenantsarray= $tenants.Split(",")
 
 . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
 . (Join-Path -Path $PSScriptRoot -ChildPath "..\Github-Helper.ps1" -Resolve)
@@ -80,7 +79,7 @@ foreach ($deployEnvironment in $environmentsArray) {
     $apps | ForEach-Object {
         try {
             Write-Host "File found: $_"
-            PublishAndInstallApp($_)
+            PublishAndInstallApp($_, $tenants)
         }
         catch {            
             Write-Host $_.Exception.Message
@@ -90,7 +89,7 @@ foreach ($deployEnvironment in $environmentsArray) {
     $testApps | ForEach-Object {
         try {
             Write-Host "File found: $_"
-            PublishAndInstallApp($_)            
+            PublishAndInstallApp($_, $tenants)            
         }
         catch {            
             Write-Host $_.Exception.Message

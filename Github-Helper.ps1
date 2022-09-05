@@ -170,8 +170,11 @@ function DownloadArtifact {
 
 function PublishAndInstallApp {
     param (
+        [string[]] $tenants,
         $theApp
-    )    
+    )  
+    
+    $tenantsarray= $tenants.Split(",")
 
     foreach ($file in Get-ChildItem $_)
     {
