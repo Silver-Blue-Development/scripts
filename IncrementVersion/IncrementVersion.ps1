@@ -1,3 +1,8 @@
+[Parameter(HelpMessage = "The GitHub actor running the action", Mandatory = $false)]
+[string] $actor,
+[Parameter(HelpMessage = "The GitHub token running the action", Mandatory = $false)]
+[string] $token
+
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 
@@ -25,6 +30,7 @@ try {
             $appJsonFile = Join-Path "\$_" "app.json"
             if (Test-Path $appJsonFile) {
                 try {
+                    Write-Host "File: $($appJsonFile)"
                     $appJson = Get-Content $appJsonFile -Encoding UTF8 | ConvertFrom-Json
                     $oldVersion = [System.Version]$appJson.Version
                     $newBuild = [Int32]([DateTime]::UtcNow.ToString('yyyyMMdd'))
@@ -45,6 +51,10 @@ try {
             }
         }
     }
+ 
+    $branch = "$({ [System.IO.Path]::GetRandomFileName() })"
+    $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch
+    CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch $branch
 }
 catch {
     OutputError -message "IncrementVersionNumber action failed.$([environment]::Newline)Error: $($_.Exception.Message)$([environment]::Newline)Stacktrace: $($_.scriptStackTrace)"
