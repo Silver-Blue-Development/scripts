@@ -5,7 +5,6 @@ try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\Github-Helper.ps1" -Resolve)
 
-    $versionnumber = "+0.1"
     $project = ""
 
     $folders = @('appFolders', 'testFolders' | ForEach-Object { if ($SettingsJson.PSObject.Properties.Name -eq $_) { $settingsJson."$_" } })
@@ -27,6 +26,9 @@ try {
                 $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile -Encoding UTF8
 
                 Write-Host "app.json version set to $($appVersion)"
+                
+                Write-Host "::set-output name=outputTag::$appVersion"
+                Write-Host "set-output name=outputTag::$appVersion"
             }
             catch {
                 throw "Application manifest file($appJsonFile) is malformed."
