@@ -681,6 +681,7 @@ function CommitFromNewFolder {
     if ($branch) {
         invoke-git push -u $serverUrl $branch
         invoke-gh pr create --fill --base develop --head $branch --repo $env:GITHUB_REPOSITORY
+        invoke-gh pr merge --merge --delete-branch
         #invoke-gh pr create --fill --head $branch --repo $env:GITHUB_REPOSITORY
     }
     else {
