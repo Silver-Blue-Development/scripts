@@ -4,7 +4,9 @@ Param(
     [Parameter(HelpMessage = "The GitHub token running the action", Mandatory = $false)]
     [string] $token,
     [Parameter(HelpMessage = "Project name if the repository is setup for multiple projects (* for all projects)", Mandatory = $false)]
-    [string] $project = '.'
+    [string] $project = '.',
+    [Parameter(HelpMessage = "The increment for the version number (i.e. +0.1")]
+    [String] $versionnumber = "+0.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,8 +18,7 @@ try {
  
     $directCommit = true;
     $branch = "$(if (!$directCommit) { [System.IO.Path]::GetRandomFileName() })"
-    $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch
-    $versionnumber = "+0.1";
+    $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch    
 
     $versionnumber = $versionnumber.Substring(1)
     try {
