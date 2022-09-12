@@ -28,6 +28,8 @@ try {
         throw "Version number ($versionnumber) is malformed. A version number must be structured as <Major>.<Minor> or +<Major>.<Minor>"
     }
 
+    Write-Host "The version increment is $($newVersion.Major) and $($newVersion.Minor)"
+
     if (!$project) { $project = '.' }
 
     if ($project -ne '.') {
@@ -56,7 +58,7 @@ try {
                 Write-Host "The old repoversion is $($oldVersion)"              
                 # $repoVersion = $newVersion                
                 # if ($addToVersionNumber) {
-                $repoVersion = [System.Version]"$($oldVersion.Major+1).$($oldVersion.Minor+1).0.0"
+                $repoVersion = [System.Version]"$($oldVersion.Major+$newVersion.Major).$($oldVersion.Minor+$newVersion.Minor).0.0"
                     # $repoVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).0.0"
                 # }                
                 Write-Host "The new repoversion is $($repoVersion)"    
