@@ -51,30 +51,6 @@ $testRunnerApps = @($permissionsMockAppId, $testRunnerAppId) + $performanceToolk
 
 $MicrosoftTelemetryConnectionString = "InstrumentationKey=84bd9223-67d4-4378-8590-9e4a46023be2;IngestionEndpoint=https://westeurope-1.in.applicationinsights.azure.com/"
 
-# function invoke-git {
-#     Param(
-#         [parameter(mandatory = $true, position = 0)][string] $command,
-#         [parameter(mandatory = $false, position = 1, ValueFromRemainingArguments = $true)] $remaining
-#     )
-
-#     Write-Host -ForegroundColor Yellow "git $command $remaining"
-#     git $command $remaining
-#     if ($lastexitcode) { throw "git $command error" }
-# }
-
-# function invoke-gh {
-#     Param(
-#         [parameter(mandatory = $true, position = 0)][string] $command,
-#         [parameter(mandatory = $false, position = 1, ValueFromRemainingArguments = $true)] $remaining
-#     )
-
-#     Write-Host -ForegroundColor Yellow "gh $command $remaining"
-#     $ErrorActionPreference = "SilentlyContinue"
-#     gh $command $remaining
-#     $ErrorActionPreference = "Stop"
-#     if ($lastexitcode) { throw "gh $command error" }
-# }
-
 function invoke-gh {
     Param(
         [switch] $silent,
@@ -135,16 +111,6 @@ function OutputWarning {
     }
 }
 
-# function MaskValueInLog {
-#     Param(
-#         [string] $value
-#     )
-
-#     if (!$runningLocal) {
-#         Write-Host "::add-mask::$value"
-#     }
-# }
-
 function OutputDebug {
     Param(
         [string] $message
@@ -158,35 +124,6 @@ function OutputDebug {
     }
 }
 
-# function GetUniqueFolderName {
-#     Param(
-#         [string] $baseFolder,
-#         [string] $folderName
-#     )
-
-#     $i = 2
-#     $name = $folderName
-#     while (Test-Path (Join-Path $baseFolder $name)) {
-#         $name = "$folderName($i)"
-#         $i++
-#     }
-#     $name
-# }
-
-# function stringToInt {
-#     Param(
-#         [string] $str,
-#         [int] $default = -1
-#     )
-
-#     $i = 0
-#     if ([int]::TryParse($str.Trim(), [ref] $i)) { 
-#         $i
-#     }
-#     else {
-#         $default
-#     }
-# }
 
 function Expand-7zipArchive {
     Param (
@@ -229,10 +166,7 @@ function DownloadAndImportBcContainerHelper {
     if ($baseFolder) {
         Write-Host "BaseFolder = true"
         $repoSettingsPath = Join-Path $baseFolder $repoSettingsFile
-        # if (-not (Test-Path $repoSettingsPath)) {
-        #     Write-Host "Hello 001"
-        #     $repoSettingsPath = Join-Path $baseFolder "..\$repoSettingsFile"
-        # }
+
         if (Test-Path $repoSettingsPath) {
             Write-Host "Hello 002"
             if (-not $BcContainerHelperVersion) {
@@ -248,40 +182,20 @@ function DownloadAndImportBcContainerHelper {
             $params += @{ "bcContainerHelperConfigFile" = $repoSettingsPath }
         }
     }
-    # if (-not $BcContainerHelperVersion) {
-    #    $BcContainerHelperVersion = "latest"
-    # }
+    $tempName = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
+    $webclient = New-Object System.Net.WebClient
 
-    # if ($bcContainerHelperVersion -eq "none") {
-    #     $tempName = ""
-    #     $module = Get-Module BcContainerHelper
-    #     if (-not $module) {
-    #         OutputError "When setting BcContainerHelperVersion to none, you need to ensure that BcContainerHelper is installed on the build agent"
-    #     }
+    Write-Host "Downloading BcContainerHelper $BcContainerHelperVersion version"
+    try {
+        $webclient.DownloadFile("https://bccontainerhelper.azureedge.net/public/$($BcContainerHelperVersion).zip", "$tempName.zip")
+    }
+    catch {
+        $webclient.DownloadFile("https://bccontainerhelper.blob.core.windows.net/public/$($BcContainerHelperVersion).zip", "$tempName.zip")        
+    }
+    Expand-7zipArchive -Path "$tempName.zip" -DestinationPath $tempName
+    Remove-Item -Path "$tempName.zip"
 
-    #     $BcContainerHelperPath = Join-Path (Split-Path $module.Path -parent) "BcContainerHelper.ps1" -Resolve
-    # }
-    # else {
-        $tempName = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
-        $webclient = New-Object System.Net.WebClient
-        # if ($BcContainerHelperVersion -eq "dev") {
-        #     Write-Host "Downloading BcContainerHelper developer version"
-        #     $webclient.DownloadFile("https://github.com/microsoft/navcontainerhelper/archive/dev.zip", "$tempName.zip")
-        # }
-        # else {
-        Write-Host "Downloading BcContainerHelper $BcContainerHelperVersion version"
-        try {
-            $webclient.DownloadFile("https://bccontainerhelper.azureedge.net/public/$($BcContainerHelperVersion).zip", "$tempName.zip")
-        }
-        catch {
-            $webclient.DownloadFile("https://bccontainerhelper.blob.core.windows.net/public/$($BcContainerHelperVersion).zip", "$tempName.zip")        
-        }
-        #}
-        Expand-7zipArchive -Path "$tempName.zip" -DestinationPath $tempName
-        Remove-Item -Path "$tempName.zip"
-
-        $BcContainerHelperPath = (Get-Item -Path (Join-Path $tempName "*\BcContainerHelper.ps1")).FullName
-    # }
+    $BcContainerHelperPath = (Get-Item -Path (Join-Path $tempName "*\BcContainerHelper.ps1")).FullName
     . $BcContainerHelperPath @params
     $tempName
 }
@@ -886,228 +800,6 @@ function CmdDo {
     }
 }
 
-
-# function installModules {
-#     Param(
-#         [String[]] $modules
-#     )
-
-#     $modules | ForEach-Object {
-#         if (-not (get-installedmodule -Name $_ -ErrorAction SilentlyContinue)) {
-#             Write-Host "Installing module $_"
-#             Install-Module $_ -Force | Out-Null
-#         }
-#     }
-#     $modules | ForEach-Object { 
-#         Write-Host "Importing module $_"
-#         Import-Module $_ -DisableNameChecking -WarningAction SilentlyContinue | Out-Null
-#     }
-# }
-
-# function CloneIntoNewFolder {
-#     Param(
-#         [string] $actor,
-#         [string] $token,
-#         [string] $branch
-#     )
-
-#     $baseFolder = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
-#     New-Item $baseFolder -ItemType Directory | Out-Null
-#     Set-Location $baseFolder
-#     $serverUri = [Uri]::new($env:GITHUB_SERVER_URL)
-#     $serverUrl = "$($serverUri.Scheme)://$($actor):$($token)@$($serverUri.Host)/$($env:GITHUB_REPOSITORY)"
-
-#     # Environment variables for hub commands
-#     $env:GITHUB_USER = $actor
-#     $env:GITHUB_TOKEN = $token
-
-#     # Configure git username and email
-#     invoke-git config --global user.email "$actor@users.noreply.github.com"
-#     invoke-git config --global user.name "$actor"
-
-#     # Configure hub to use https
-#     invoke-git config --global hub.protocol https
-
-#     invoke-git clone $serverUrl
-
-#     Set-Location *
-
-#     if ($branch) {
-#         invoke-git checkout -b $branch
-#     }
-
-#     $serverUrl
-# }
-
-# function CommitFromNewFolder {
-#     Param(
-#         [string] $severUrl,
-#         [string] $commitMessage,
-#         [string] $branch
-#     )
-
-#     invoke-git add *
-#     if ($commitMessage.Length -gt 250) {
-#         $commitMessage = "$($commitMessage.Substring(0,250))...)"
-#     }
-#     invoke-git commit --allow-empty -m "'$commitMessage'"
-#     if ($branch) {
-#         invoke-git push -u $serverUrl $branch
-#         invoke-gh pr create --fill --head $branch --repo $env:GITHUB_REPOSITORY
-#     }
-#     else {
-#         invoke-git push $serverUrl
-#     }
-# }
-
-# function Select-Value {
-#     Param(
-#         [Parameter(Mandatory=$false)]
-#         [string] $title,
-#         [Parameter(Mandatory=$false)]
-#         [string] $description,
-#         [Parameter(Mandatory=$true)]
-#         $options,
-#         [Parameter(Mandatory=$false)]
-#         [string] $default = "",
-#         [Parameter(Mandatory=$true)]
-#         [string] $question
-#     )
-
-#     if ($title) {
-#         Write-Host -ForegroundColor Yellow $title
-#         Write-Host -ForegroundColor Yellow ("-"*$title.Length)
-#     }
-#     if ($description) {
-#         Write-Host $description
-#         Write-Host
-#     }
-#     $offset = 0
-#     $keys = @()
-#     $values = @()
-
-#     $options.GetEnumerator() | ForEach-Object {
-#         Write-Host -ForegroundColor Yellow "$([char]($offset+97)) " -NoNewline
-#         $keys += @($_.Key)
-#         $values += @($_.Value)
-#         if ($_.Key -eq $default) {
-#             Write-Host -ForegroundColor Yellow $_.Value
-#             $defaultAnswer = $offset
-#         }
-#         else {
-#             Write-Host $_.Value
-#         }
-#         $offset++     
-#     }
-#     Write-Host
-#     $answer = -1
-#     do {
-#         Write-Host "$question " -NoNewline
-#         if ($defaultAnswer -ge 0) {
-#             Write-Host "(default $([char]($defaultAnswer + 97))) " -NoNewline
-#         }
-#         $selection = (Read-Host).ToLowerInvariant()
-#         if ($selection -eq "") {
-#             if ($defaultAnswer -ge 0) {
-#                 $answer = $defaultAnswer
-#             }
-#             else {
-#                 Write-Host -ForegroundColor Red "No default value exists. " -NoNewline
-#             }
-#         }
-#         else {
-#             if (($selection.Length -ne 1) -or (([int][char]($selection)) -lt 97 -or ([int][char]($selection)) -ge (97+$offset))) {
-#                 Write-Host -ForegroundColor Red "Illegal answer. " -NoNewline
-#             }
-#             else {
-#                 $answer = ([int][char]($selection))-97
-#             }
-#         }
-#         if ($answer -eq -1) {
-#             if ($offset -eq 2) {
-#                 Write-Host -ForegroundColor Red "Please answer one letter, a or b"
-#             }
-#             else {
-#                 Write-Host -ForegroundColor Red "Please answer one letter, from a to $([char]($offset+97-1))"
-#             }
-#         }
-#     } while ($answer -eq -1)
-
-#     Write-Host -ForegroundColor Green "$($values[$answer]) selected"
-#     Write-Host
-#     $keys[$answer]
-# }
-
-# function Enter-Value {
-#     Param(
-#         [Parameter(Mandatory=$false)]
-#         [string] $title,
-#         [Parameter(Mandatory=$false)]
-#         [string] $description,
-#         [Parameter(Mandatory=$false)]
-#         $options,
-#         [Parameter(Mandatory=$false)]
-#         [string] $default = "",
-#         [Parameter(Mandatory=$true)]
-#         [string] $question,
-#         [switch] $doNotConvertToLower,
-#         [switch] $previousStep
-#     )
-
-#     if ($title) {
-#         Write-Host -ForegroundColor Yellow $title
-#         Write-Host -ForegroundColor Yellow ("-"*$title.Length)
-#     }
-#     if ($description) {
-#         Write-Host $description
-#         Write-Host
-#     }
-#     $answer = ""
-#     do {
-#         Write-Host "$question " -NoNewline
-#         if ($options) {
-#             Write-Host "($([string]::Join(', ', $options))) " -NoNewline
-#         }
-#         if ($default) {
-#             Write-Host "(default $default) " -NoNewline
-#         }
-#         if ($doNotConvertToLower) {
-#             $selection = Read-Host
-#         }
-#         else {
-#             $selection = (Read-Host).ToLowerInvariant()
-#         }
-#         if ($selection -eq "") {
-#             if ($default) {
-#                 $answer = $default
-#             }
-#             else {
-#                 Write-Host -ForegroundColor Red "No default value exists. "
-#             }
-#         }
-#         else {
-#             if ($options) {
-#                 $answer = $options | Where-Object { $_ -like "$selection*" }
-#                 if (-not ($answer)) {
-#                     Write-Host -ForegroundColor Red "Illegal answer. Please answer one of the options."
-#                 }
-#                 elseif ($answer -is [Array]) {
-#                     Write-Host -ForegroundColor Red "Multiple options match the answer. Please answer one of the options that matched the previous selection."
-#                     $options = $answer
-#                     $answer = $null
-#                 }
-#             }
-#             else {
-#                 $answer = $selection
-#             }
-#         }
-#     } while (-not ($answer))
-
-#     Write-Host -ForegroundColor Green "$answer selected"
-#     Write-Host
-#     $answer
-# }
-
 function GetContainerName([string] $project) {
     "bc$($project -replace "\W")$env:GITHUB_RUN_ID"
 }
@@ -1124,41 +816,3 @@ function ConvertTo-HashTable() {
     }
     $ht
 }
-
-# function CheckAndCreateProjectFolder {
-#     Param(
-#         [string] $project
-#     )
-
-#     if (-not $project) { $project -eq "." }
-#     if ($project -ne ".") {
-#         if (Test-Path $ALGoSettingsFile) {
-#             Write-Host "Reading $ALGoSettingsFile"
-#             $settingsJson = Get-Content $ALGoSettingsFile -Encoding UTF8 | ConvertFrom-Json
-#             if ($settingsJson.appFolders.Count -eq 0 -and $settingsJson.testFolders.Count -eq 0) {
-#                 OutputWarning "Converting the repository to a multi-project repository as no other apps have been added previously."
-#                 New-Item $project -ItemType Directory | Out-Null
-#                 Move-Item -path $ALGoFolder -Destination $project
-#                 Set-Location $project
-#             }
-#             else {
-#                 throw "Repository is setup for a single project, cannot add a project. Move all appFolders, testFolders and the .AL-Go folder to a subdirectory in order to convert to a multi-project repository."
-#             }
-#         }
-#         else {
-#             if (!(Test-Path $project)) {
-#                 New-Item -Path (Join-Path $project $ALGoFolder) -ItemType Directory | Out-Null
-#                 Set-Location $project
-#                 OutputWarning "Project folder doesn't exist, creating a new project folder and a default settings file with country us. Please modify if needed."
-#                 [ordered]@{
-#                     "country" = "us"
-#                     "appFolders" = @()
-#                     "testFolders" = @()
-#                 } | ConvertTo-Json | Set-Content $ALGoSettingsFile -Encoding UTF8
-#             }
-#             else {
-#                 Set-Location $project
-#             }
-#         }
-#     }
-# }

@@ -31,21 +31,7 @@ try {
     Write-Host "The version increment is $($newVersion.Major) and $($newVersion.Minor)"
 
     if (!$project) { $project = '.' }
-
-    # if ($project -ne '.') {
-    #     $projects = @(Get-Item -Path "$project\.AL-Go\Settings.json" | ForEach-Object { ($_.FullName.Substring((Get-Location).Path.Length).Split('\'))[1] })
-    #     if ($projects.Count -eq 0) {
-    #         if ($project -eq '*') {
-    #             $projects = @( '.' )
-    #         }
-    #         else {
-    #             throw "Project folder $project not found"
-    #         }
-    #     }
-    # }
-    # else {
     $projects = @( '.' )
-    # }
 
     $projects | ForEach-Object {
         $project = $_
@@ -87,11 +73,7 @@ try {
             }
         }
 
-        # Write-Host "::set-output name=outputTag::$appVersion"
-        # Write-Host "set-output name=outputTag::$appVersion"
         Add-Content -Path $env:GITHUB_ENV -Value "outputTag=$appVersion"
-        # Write-Host "::set-output name=outputBranch::$branch"
-        # Write-Host "set-output name=outputBranch::$branch"
         Add-Content -Path $env:GITHUB_ENV -Value "outputBranch=$branch"
 
         CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch $branch
