@@ -47,34 +47,33 @@ try {
 
     $projects | ForEach-Object {
         $project = $_
-        # try {
-        #     Write-Host "Reading settings from $project\$ALGoSettingsFile"
-        #     $settingsJson = Get-Content "$project\$ALGoSettingsFile" -Encoding UTF8 | ConvertFrom-Json
-        #     if ($settingsJson.PSObject.Properties.Name -eq "RepoVersion") {
-        #         $oldVersion = [System.Version]"$($settingsJson.RepoVersion).0.0"
-        #         if ((!$addToVersionNumber) -and $newVersion -le $oldVersion) {
-        #             throw "The new version number ($($newVersion.Major).$($newVersion.Minor)) must be larger than the old version number ($($oldVersion.Major).$($oldVersion.Minor))"
-        #         }
-        #         $repoVersion = $newVersion
-        #         if ($addToVersionNumber) {
-        #             $repoVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).0.0"
-        #         }
-        #         $settingsJson.RepoVersion = "$($repoVersion.Major).$($repoVersion.Minor)"
-        #     }
-        #     else {
-        #         $repoVersion = $newVersion
-        #         if ($addToVersionNumber) {
-        #             $repoVersion = [System.Version]"$($newVersion.Major+1).$($newVersion.Minor).0.0"
-        #         }
-        #         Add-Member -InputObject $settingsJson -NotePropertyName "RepoVersion" -NotePropertyValue "$($repoVersion.Major).$($repoVersion.Minor)"
-        #     }
-        #     $useRepoVersion = (($settingsJson.PSObject.Properties.Name -eq "VersioningStrategy") -and (($settingsJson.VersioningStrategy -band 16) -eq 16))
-        #     $settingsJson
-        #     $settingsJson | ConvertTo-Json -Depth 99 | Set-Content "$project\$ALGoSettingsFile" -Encoding UTF8
-        # }
-        # catch {
-        #     throw "Settings file $project\$ALGoSettingsFile is malformed.$([environment]::Newline) $($_.Exception.Message)."
-        # }
+        try {
+            Write-Host "Reading settings from $project\$ALGoSettingsFile"
+            $settingsJson = Get-Content "$project\$ALGoSettingsFile" -Encoding UTF8 | ConvertFrom-Json
+            if ($settingsJson.PSObject.Properties.Name -eq "RepoVersion") {
+                $oldVersion = [System.Version]"$($settingsJson.RepoVersion).0.0"
+                Write-Host "The old repoversion is $($oldVersion)"              
+                $repoVersion = $newVersion                
+                if ($addToVersionNumber) {
+                    $repoVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).0.0"
+                }                
+                Write-Host "The new repoversion is $($repoVersion)"    
+                $settingsJson.RepoVersion = "$($repoVersion.Major).$($repoVersion.Minor)"
+            }
+            else {
+                $repoVersion = $newVersion
+                if ($addToVersionNumber) {
+                    $repoVersion = [System.Version]"$($newVersion.Major+1).$($newVersion.Minor).0.0"
+                }
+                Add-Member -InputObject $settingsJson -NotePropertyName "RepoVersion" -NotePropertyValue "$($repoVersion.Major).$($repoVersion.Minor)"
+            }
+            $useRepoVersion = (($settingsJson.PSObject.Properties.Name -eq "VersioningStrategy") -and (($settingsJson.VersioningStrategy -band 16) -eq 16))
+            $settingsJson
+            $settingsJson | ConvertTo-Json -Depth 99 | Set-Content "$project\$ALGoSettingsFile" -Encoding UTF8
+        }
+        catch {
+            throw "Settings file $project\$ALGoSettingsFile is malformed.$([environment]::Newline) $($_.Exception.Message)."
+        }
 
         $folders = @('appFolders', 'testFolders' | ForEach-Object { if ($SettingsJson.PSObject.Properties.Name -eq $_) { $settingsJson."$_" } })
         if (-not ($folders)) {
