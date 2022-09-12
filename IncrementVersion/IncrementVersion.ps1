@@ -88,16 +88,13 @@ try {
             }
         }
 
-        set-output name=outputTag::$appVersion
-        set-output name=outputBranch::$branch
+        Write-Host "::set-output name=outputTag::$appVersion"
+        Write-Host "set-output name=outputTag::$appVersion"
+        Add-Content -Path $env:GITHUB_ENV -Value "outputTag=$appVersion"
 
-        # Write-Host "::set-output name=outputTag::$appVersion"
-        # Write-Host "set-output name=outputTag::$appVersion"
-        # Add-Content -Path $env:GITHUB_ENV -Value "outputTag=$appVersion"
-
-        # Write-Host "::set-output name=outputBranch::$branch"
-        # Write-Host "set-output name=outputBranch::$branch"
-        # Add-Content -Path $env:GITHUB_ENV -Value "outputBranch=$appVersion"
+        Write-Host "::set-output name=outputBranch::$branch"
+        Write-Host "set-output name=outputBranch::$branch"
+        Add-Content -Path $env:GITHUB_ENV -Value "outputBranch=$appVersion"
 
         CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch $branch
     }
