@@ -6,7 +6,7 @@ Param(
     [Parameter(HelpMessage = "Project name if the repository is setup for multiple projects (* for all projects)", Mandatory = $false)]
     [string] $project = '.',
     [Parameter(HelpMessage = "The increment for the version number (i.e. +0.1")]
-    [String] $versionnumber = "+0.1"
+    [String] $versionnumber = '+0.1'
 )
 
 $ErrorActionPreference = "Stop"
