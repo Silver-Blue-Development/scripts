@@ -17,7 +17,8 @@ try {
     $project = '.'
     $directCommit = false;
     # $branch = "$(if (!$directCommit) { [System.IO.Path]::GetRandomFileName() })"
-    # $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch    
+    $branch = "develop"
+    $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch    
 
     Write-Host "Versionnumber = $($versionNumber)"
     $versionNumber = $versionNumber.Substring(1)
@@ -76,7 +77,7 @@ try {
         Add-Content -Path $env:GITHUB_ENV -Value "outputTag=$appVersion"
         #Add-Content -Path $env:GITHUB_ENV -Value "outputBranch=$branch"
 
-        CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch "develop" #$branch
+        CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch $branch
     }
 }
 catch {

@@ -712,7 +712,7 @@ function CloneIntoNewFolder {
     # Configure hub to use https
     invoke-git config --global hub.protocol https
 
-    invoke-git clone $serverUrl
+    # invoke-git clone $serverUrl
 
     Set-Location *
 
