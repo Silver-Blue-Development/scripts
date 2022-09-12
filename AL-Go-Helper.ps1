@@ -714,11 +714,13 @@ function CloneIntoNewFolder {
 
     # invoke-git clone $serverUrl
 
-    Set-Location *
+    # Set-Location *
 
-    if ($branch) {
-        invoke-git checkout -b $branch
-    }
+    # if ($branch) {
+    #     invoke-git checkout -b $branch
+    # }
+
+    Write-Host "The server URL is $($serverUrl)"
 
     $serverUrl
 }
