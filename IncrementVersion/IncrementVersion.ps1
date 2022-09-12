@@ -32,26 +32,26 @@ try {
         $appJsonFile = Join-Path ".\App\app.json"
         Write-Host $appJsonFile
 
-        if (Test-Path $appJsonFile) {
-            try {
-                Write-Host "File: $($appJsonFile)"
-                $appJson = Get-Content $appJsonFile -Encoding UTF8 | ConvertFrom-Json
-                $oldVersion = [System.Version]$appJson.Version
-                $newBuild = [Int32]([DateTime]::UtcNow.ToString('yyyyMMdd'))
+        # if (Test-Path $appJsonFile) {
+        #     try {
+        Write-Host "File: $($appJsonFile)"
+        $appJson = Get-Content $appJsonFile -Encoding UTF8 | ConvertFrom-Json
+        $oldVersion = [System.Version]$appJson.Version
+        $newBuild = [Int32]([DateTime]::UtcNow.ToString('yyyyMMdd'))
 
-                $appVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).$($newBuild).0"
-                
-                $appJson.Version = "$appVersion"
-                $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile -Encoding UTF8
+        $appVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).$($newBuild).0"
+        
+        $appJson.Version = "$appVersion"
+        $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile -Encoding UTF8
 
-                Write-Host "app.json version set to $($appVersion)"
-                
-                Write-Host "::set-output name=outputTag::$appVersion"
-                Write-Host "set-output name=outputTag::$appVersion"
-            }
-            catch {
-                throw "Application manifest file($appJsonFile) is malformed."
-            }
+        Write-Host "app.json version set to $($appVersion)"
+        
+        Write-Host "::set-output name=outputTag::$appVersion"
+        Write-Host "set-output name=outputTag::$appVersion"
+            # }
+            # catch {
+            #     throw "Application manifest file($appJsonFile) is malformed."
+            # }
         }
         # }
     }
