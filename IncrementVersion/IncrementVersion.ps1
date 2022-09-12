@@ -54,7 +54,7 @@ try {
             # }
         }
         # }
-    }
+    # }
  
     $branch = "$({ [System.IO.Path]::GetRandomFileName() })"
     $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch
