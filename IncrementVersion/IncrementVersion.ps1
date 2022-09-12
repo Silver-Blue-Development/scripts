@@ -18,6 +18,15 @@ try {
     $branch = "$(if (!$directCommit) { [System.IO.Path]::GetRandomFileName() })"
     $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch
     $addToVersionNumber = true;
+    $versionnumber = "+20.0";
+
+    $versionnumber = $versionnumber.Substring(1)
+    try {
+        $newVersion = [System.Version]"$($versionnumber).0.0"
+    }
+    catch {
+        throw "Version number ($versionnumber) is malformed. A version number must be structured as <Major>.<Minor> or +<Major>.<Minor>"
+    }
 
     if (!$project) { $project = '.' }
 
