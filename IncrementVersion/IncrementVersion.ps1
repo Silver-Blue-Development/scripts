@@ -91,6 +91,9 @@ try {
         Write-Host "::set-output name=outputTag::$appVersion"
         Write-Host "set-output name=outputTag::$appVersion"
 
+        Write-Host "::set-output name=outputBranch::$branch"
+        Write-Host "set-output name=outputBranch::$branch"
+
         CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch $branch
     }
 }
