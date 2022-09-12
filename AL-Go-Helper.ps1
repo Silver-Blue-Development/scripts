@@ -680,7 +680,8 @@ function CommitFromNewFolder {
     invoke-git commit --allow-empty -m "'$commitMessage'"
     if ($branch) {
         invoke-git push -u $serverUrl $branch
-        invoke-gh pr create --fill --head $branch --repo $env:GITHUB_REPOSITORY
+        invoke-gh pr create --fill --base develop --head $branch --repo $env:GITHUB_REPOSITORY
+        #invoke-gh pr create --fill --head $branch --repo $env:GITHUB_REPOSITORY
     }
     else {
         invoke-git push $serverUrl
