@@ -76,7 +76,7 @@ try {
         Add-Content -Path $env:GITHUB_ENV -Value "outputTag=$appVersion"
         #Add-Content -Path $env:GITHUB_ENV -Value "outputBranch=$branch"
 
-        # CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch "develop" #$branch
+        CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch "develop" #$branch
     }
 }
 catch {
