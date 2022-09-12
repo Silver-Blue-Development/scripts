@@ -51,23 +51,25 @@ try {
             Write-Host "Reading settings from $project\$ALGoSettingsFile"
             $settingsJson = Get-Content "$project\$ALGoSettingsFile" -Encoding UTF8 | ConvertFrom-Json
             if ($settingsJson.PSObject.Properties.Name -eq "RepoVersion") {
-                $oldVersion = [System.Version]"$($settingsJson.RepoVersion).0.0"
+                $oldVersion = "$($settingsJson.RepoVersion).0.0"
+                # $oldVersion = [System.Version]"$($settingsJson.RepoVersion).0.0"
                 Write-Host "The old repoversion is $($oldVersion)"              
-                $repoVersion = $newVersion                
-                if ($addToVersionNumber) {
-                    $repoVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).0.0"
-                }                
+                # $repoVersion = $newVersion                
+                # if ($addToVersionNumber) {
+                $repoVersion = [System.Version]"$($oldVersion.Major+1).$($oldVersion.Minor+1).0.0"
+                    # $repoVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).0.0"
+                # }                
                 Write-Host "The new repoversion is $($repoVersion)"    
                 $settingsJson.RepoVersion = "$($repoVersion.Major).$($repoVersion.Minor)"
             }
-            else {
-                $repoVersion = $newVersion
-                if ($addToVersionNumber) {
-                    $repoVersion = [System.Version]"$($newVersion.Major+1).$($newVersion.Minor).0.0"
-                }
-                Add-Member -InputObject $settingsJson -NotePropertyName "RepoVersion" -NotePropertyValue "$($repoVersion.Major).$($repoVersion.Minor)"
-            }
-            $useRepoVersion = (($settingsJson.PSObject.Properties.Name -eq "VersioningStrategy") -and (($settingsJson.VersioningStrategy -band 16) -eq 16))
+            # else {
+            #     $repoVersion = $newVersion
+            #     if ($addToVersionNumber) {
+            #         $repoVersion = [System.Version]"$($newVersion.Major+1).$($newVersion.Minor).0.0"
+            #     }
+            #     Add-Member -InputObject $settingsJson -NotePropertyName "RepoVersion" -NotePropertyValue "$($repoVersion.Major).$($repoVersion.Minor)"
+            # }
+            # $useRepoVersion = (($settingsJson.PSObject.Properties.Name -eq "VersioningStrategy") -and (($settingsJson.VersioningStrategy -band 16) -eq 16))
             $settingsJson
             $settingsJson | ConvertTo-Json -Depth 99 | Set-Content "$project\$ALGoSettingsFile" -Encoding UTF8
         }
@@ -85,17 +87,18 @@ try {
             if (Test-Path $appJsonFile) {
                 try {
                     $appJson = Get-Content $appJsonFile -Encoding UTF8 | ConvertFrom-Json
-                    $oldVersion = [System.Version]$appJson.Version
+                    # $oldVersion = [System.Version]$appJson.Version
                     $newBuild = [Int32]([DateTime]::UtcNow.ToString('yyyyMMdd'))
-                    if ($useRepoVersion) {
-                        $appVersion = $repoVersion
-                    }
-                    elseif ($addToVersionNumber) {
-                        $appVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).$($newBuild).0"
-                    }
-                    else {
-                        $appVersion = $newVersion
-                    }
+                    # if ($useRepoVersion) {
+                    #     $appVersion = $repoVersion
+                    # }
+                    # elseif ($addToVersionNumber) {
+                    $appVersion = [System.Version]"$($repoVersion.Major).$($repoVersion.Minor).$($newBuild).0"
+                        # $appVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).$($newBuild).0"
+                    # }
+                    # else {
+                    #     $appVersion = $newVersion
+                    # }
                     $appJson.Version = "$appVersion"
                     $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile -Encoding UTF8
                 }
