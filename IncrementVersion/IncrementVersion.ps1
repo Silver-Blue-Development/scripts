@@ -17,7 +17,6 @@ try {
     $directCommit = true;
     $branch = "$(if (!$directCommit) { [System.IO.Path]::GetRandomFileName() })"
     $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch
-    # $addToVersionNumber = true;
     $versionnumber = "+0.1";
 
     $versionnumber = $versionnumber.Substring(1)
@@ -53,25 +52,11 @@ try {
             Write-Host "Reading settings from $project\$ALGoSettingsFile"
             $settingsJson = Get-Content "$project\$ALGoSettingsFile" -Encoding UTF8 | ConvertFrom-Json
             if ($settingsJson.PSObject.Properties.Name -eq "RepoVersion") {
-                $oldVersion = "$($settingsJson.RepoVersion).0.0"
-                $oldVersion = [System.Version]"$($settingsJson.RepoVersion).0.0"
-                Write-Host "The old repoversion is $($oldVersion)"              
-                # $repoVersion = $newVersion                
-                # if ($addToVersionNumber) {
+                # $oldVersion = "$($settingsJson.RepoVersion).0.0"
+                $oldVersion = [System.Version]"$($settingsJson.RepoVersion).0.0"         
                 $repoVersion = [System.Version]"$($oldVersion.Major+$newVersion.Major).$($oldVersion.Minor+$newVersion.Minor).0.0"
-                    # $repoVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).0.0"
-                # }                
-                Write-Host "The new repoversion is $($repoVersion)"    
                 $settingsJson.RepoVersion = "$($repoVersion.Major).$($repoVersion.Minor)"
             }
-            # else {
-            #     $repoVersion = $newVersion
-            #     if ($addToVersionNumber) {
-            #         $repoVersion = [System.Version]"$($newVersion.Major+1).$($newVersion.Minor).0.0"
-            #     }
-            #     Add-Member -InputObject $settingsJson -NotePropertyName "RepoVersion" -NotePropertyValue "$($repoVersion.Major).$($repoVersion.Minor)"
-            # }
-            # $useRepoVersion = (($settingsJson.PSObject.Properties.Name -eq "VersioningStrategy") -and (($settingsJson.VersioningStrategy -band 16) -eq 16))
             $settingsJson
             $settingsJson | ConvertTo-Json -Depth 99 | Set-Content "$project\$ALGoSettingsFile" -Encoding UTF8
         }
@@ -91,15 +76,8 @@ try {
                     $appJson = Get-Content $appJsonFile -Encoding UTF8 | ConvertFrom-Json
                     $oldVersion = [System.Version]$appJson.Version
                     $newBuild = [Int32]([DateTime]::UtcNow.ToString('yyyyMMdd'))
-                    # if ($useRepoVersion) {
-                    #     $appVersion = $repoVersion
-                    # }
-                    # elseif ($addToVersionNumber) {                    
-                        $appVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).$($newBuild).0"
-                    # }
-                    # else {
-                    #     $appVersion = $newVersion
-                    # }
+
+                    $appVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).$($newBuild).0"
                     $appJson.Version = "$appVersion"
                     $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile -Encoding UTF8
                 }
@@ -108,50 +86,13 @@ try {
                 }
             }
         }
-    CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch $branch
+
+        Write-Host "::set-output name=outputTag::$appVersion"
+        Write-Host "set-output name=outputTag::$appVersion"
+
+        CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch $branch
     }
 }
 catch {
     OutputError -message "IncrementVersionNumber action failed.$([environment]::Newline)Error: $($_.Exception.Message)$([environment]::Newline)Stacktrace: $($_.scriptStackTrace)"
 }
-
-
-
-
-    #     Write-Host "Reading settings from $project\$ALGoSettingsFile"
-    #     $settingsJson = Get-Content "$project\$ALGoSettingsFile" -Encoding UTF8 | ConvertFrom-Json
-
-    #     $folders = @('appFolders', 'testFolders' | ForEach-Object { if ($SettingsJson.PSObject.Properties.Name -eq $_) { $settingsJson."$_" } })
-    #     if (-not ($folders)) {
-    #         $folders = Get-ChildItem -Path $project -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'app.json') } | ForEach-Object { $_.Name }
-    #     }
-    #     # $folders | ForEach-Object {
-    #     #     Write-Host "Modifying app.json in folder $project\$_"
-    #     #     Write-Host "Project $($project)"
-    #     #     Write-Host "Folder $($_)"
-    #     $appJsonFile = Join-Path ".\App\app.json"
-    #     Write-Host $appJsonFile
-
-    #     # if (Test-Path $appJsonFile) {
-    #     #     try {
-    #     Write-Host "File: $($appJsonFile)"
-    #     $appJson = Get-Content $appJsonFile -Encoding UTF8 | ConvertFrom-Json
-    #     $oldVersion = [System.Version]$appJson.Version
-    #     $newBuild = [Int32]([DateTime]::UtcNow.ToString('yyyyMMdd'))
-
-    #     $appVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).$($newBuild).0"
-        
-    #     $appJson.Version = "$appVersion"
-    #     $appJson | ConvertTo-Json -Depth 99 | Set-Content $appJsonFile -Encoding UTF8
-
-    #     Write-Host "app.json version set to $($appVersion)"
-        
-    #     Write-Host "::set-output name=outputTag::$appVersion"
-    #     Write-Host "set-output name=outputTag::$appVersion"
-    #         # }
-    #         # catch {
-    #         #     throw "Application manifest file($appJsonFile) is malformed."
-    #         # }
-    #     }
-    #     # }
-    # # }
