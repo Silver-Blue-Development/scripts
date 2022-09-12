@@ -14,6 +14,7 @@ inputs:
   versionNumber:
     description: Updated Version Number. Use Major.Minor for absolute change, use +Major.Minor for incremental change.
     required: true
+    default: '+0.1'
 runs:
   using: composite
   steps:
