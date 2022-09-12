@@ -17,7 +17,7 @@ try {
     $directCommit = true;
     $branch = "$(if (!$directCommit) { [System.IO.Path]::GetRandomFileName() })"
     $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch
-    $addToVersionNumber = true;
+    # $addToVersionNumber = true;
     $versionnumber = "+0.1";
 
     $versionnumber = $versionnumber.Substring(1)
@@ -52,7 +52,7 @@ try {
             $settingsJson = Get-Content "$project\$ALGoSettingsFile" -Encoding UTF8 | ConvertFrom-Json
             if ($settingsJson.PSObject.Properties.Name -eq "RepoVersion") {
                 $oldVersion = "$($settingsJson.RepoVersion).0.0"
-                # $oldVersion = [System.Version]"$($settingsJson.RepoVersion).0.0"
+                $oldVersion = [System.Version]"$($settingsJson.RepoVersion).0.0"
                 Write-Host "The old repoversion is $($oldVersion)"              
                 # $repoVersion = $newVersion                
                 # if ($addToVersionNumber) {
@@ -87,7 +87,7 @@ try {
             if (Test-Path $appJsonFile) {
                 try {
                     $appJson = Get-Content $appJsonFile -Encoding UTF8 | ConvertFrom-Json
-                    # $oldVersion = [System.Version]$appJson.Version
+                    $oldVersion = [System.Version]$appJson.Version
                     $newBuild = [Int32]([DateTime]::UtcNow.ToString('yyyyMMdd'))
                     # if ($useRepoVersion) {
                     #     $appVersion = $repoVersion
