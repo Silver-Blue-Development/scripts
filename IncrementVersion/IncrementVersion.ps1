@@ -29,8 +29,8 @@ try {
             Write-Host "Modifying app.json in folder $project\$_"
             Write-Host "Project $($project)"
             Write-Host "Folder $($_)"
-            
-            $appJsonFile = Join-Path "\$_" "app.json"
+
+            $appJsonFile = Join-Path "$_" "app.json"
             Write-Host $appJsonFile
 
             if (Test-Path $appJsonFile) {
