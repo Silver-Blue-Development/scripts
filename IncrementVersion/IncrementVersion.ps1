@@ -92,9 +92,8 @@ try {
                     # if ($useRepoVersion) {
                     #     $appVersion = $repoVersion
                     # }
-                    # elseif ($addToVersionNumber) {
-                    $appVersion = [System.Version]"$($repoVersion.Major).$($repoVersion.Minor).$($newBuild).0"
-                        # $appVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).$($newBuild).0"
+                    # elseif ($addToVersionNumber) {                    
+                        $appVersion = [System.Version]"$($newVersion.Major+$oldVersion.Major).$($newVersion.Minor+$oldVersion.Minor).$($newBuild).0"
                     # }
                     # else {
                     #     $appVersion = $newVersion
