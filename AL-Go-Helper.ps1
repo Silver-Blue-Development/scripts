@@ -682,7 +682,7 @@ function CommitFromNewFolder {
         invoke-git push -u $serverUrl $branch
         invoke-gh pr create --fill --base develop --head $branch --repo $env:GITHUB_REPOSITORY
         Start-Sleep -Seconds 10
-        invoke-gh checkout --ours
+        invoke-gh pr checkout --ours
         invoke-gh pr merge --merge --delete-branch 
     }
     else {
