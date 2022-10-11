@@ -23,17 +23,17 @@ foreach ($deployEnvironment in $environmentsArray) {
         
     switch ($deployEnvironment)
     {
-        "T" 
+        "T" #TODO
         {
-            $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "BC190" #TODO Set correct instance
-            $artifacts = "C:\Artifacts\Development\$repoName"
+            $devEndpointUri = "http:\\EIN-PEDR02-L10" 
+            $devPort = 7049 
+            $instanceName = "BC190"
         }
-        "A" 
+        "A" #TODO
         {
-            $serviceFolder = "C:\Program Files\Microsoft Dynamics 365 Business Central\190\Service"
-            $serverInstance = "BC190" #TODO Set correct instance 
-            $artifacts = "C:\Artifacts\Acceptance\$repoName"
+            $devEndpointUri = "http:\\EIN-PEDR02-L10" 
+            $devPort = 7049 
+            $instanceName = "BC190"
         }
     }      
 
